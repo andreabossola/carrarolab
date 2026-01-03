@@ -167,7 +167,9 @@
         // --- GENERATORE PRODOTTI ---
         function generateProductSphere() {
             const items = [];
-            items.push({ text: "< HOME", target: "HOME", x: 0, y: 35, z: -10, color: "#ff4444", scale: 1.8 });
+            // Posizionato leggermente più in basso (y:30) per facilitare il click
+            items.push({ text: "< HOME", target: "HOME", x: 0, y: 30, z: -10, color: "#ff4444", scale: 1.8 });
+            
             const heroes = [
                 { t:"OMNIA", y:"1996-2005", i:assets.cd, tech:"HERO", d:"OMNIA - ENCICLOPEDIA MULTIMEDIALE\n\nLa più grande enciclopedia digitale realizzata in Europa, edita da De Agostini. Un best-seller assoluto." },
                 { t:"ROMA 3D", y:"2011", i:assets.tab, tech:"HERO", d:"VIRTUAL HISTORY ROMA\n\nPresentata ufficialmente da Steve Jobs durante il Keynote Apple dell'iPad 2 (Marzo 2011)." },
@@ -294,23 +296,24 @@
             }, 500);
         }
 
-        // --- GESTIONE INPUT SEPARATA E PULITA ---
+        // --- GESTIONE INPUT SEPARATA E CALIBRATA ---
         
-        // 1. DESKTOP: Il mouse sposta la vista solo muovendosi (HOVER)
+        // 1. DESKTOP: Sensibilità aumentata
         function onMouseMove(e) {
             if(isModalOpen) return;
-            // Normalizza coordinate (-1 a +1)
             const mx = (e.clientX / window.innerWidth) * 2 - 1;
             const my = -(e.clientY / window.innerHeight) * 2 + 1;
             
             mouse.x = mx; mouse.y = my;
             
-            // Sensibilità ridotta (0.8) per non far "scappare" la scena
-            targetRotationY = mx * 0.8;
-            targetRotationX = -my * 0.5;
+            // CALIBRAZIONE DESKTOP:
+            // 3.2 = Molta rotazione laterale (quasi 180°)
+            // 1.8 = Molta rotazione verticale (per guardare in alto/basso)
+            targetRotationY = mx * 3.2; 
+            targetRotationX = -my * 1.8; 
         }
 
-        // 2. MOBILE: Variabili per gestire Tap vs Drag
+        // 2. MOBILE: Sensibilità molto alta per schermi piccoli
         let touchStartX = 0;
         let touchStartY = 0;
         let hasDragged = false;
@@ -325,38 +328,31 @@
 
         function onTouchMove(e) {
             if(isModalOpen) return;
-            e.preventDefault(); // Blocca scroll pagina
+            e.preventDefault(); 
             
             if(e.touches.length > 0) {
                 const t = e.touches[0];
-                
-                // Calcola distanza dal tocco iniziale
                 const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
-                if(dist > 10) hasDragged = true; // Se muovi > 10px è un drag
+                if(dist > 10) hasDragged = true; 
 
-                // Logica rotazione Mobile (simile a Desktop ma basata su touch)
                 const mx = (t.clientX / window.innerWidth) * 2 - 1;
                 const my = -(t.clientY / window.innerHeight) * 2 + 1;
                 
                 mouse.x = mx; mouse.y = my;
-                targetRotationY = mx * 1.5; // Più sensibile su mobile
-                targetRotationX = -my * 1.0;
+                
+                // CALIBRAZIONE MOBILE:
+                // Ancora più spinto del desktop per facilitare il movimento col dito
+                targetRotationY = mx * 3.5; 
+                targetRotationX = -my * 2.5; 
             }
         }
         
-        function onTouchEnd() {
-            // Reset immediato coordinate mouse per non lasciare "selezionato" l'ultimo punto toccato
-            // mouse.x = -9999; mouse.y = -9999; 
-        }
+        function onTouchEnd() {}
 
-        // 3. CLICK (Funziona sia Desktop che Tap Mobile)
+        // 3. CLICK
         function onCanvasClick(e) {
-            if(isModalOpen) return;
-            
-            // Su mobile, se abbiamo trascinato, NON cliccare
-            if(hasDragged) return;
+            if(isModalOpen || hasDragged) return;
 
-            // Aggiorna raycaster sulle coordinate attuali del mouse/tocco
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(interactables);
             
@@ -379,11 +375,9 @@
             isModalOpen = true;
         }
 
-        // Funzione globale chiusura modale (accessibile dall'HTML)
         window.closeModal = function() { 
             modal.style.display = 'none'; 
             isModalOpen = false; 
-            // Reset del flag drag per sicurezza
             hasDragged = false;
         }
 
@@ -429,7 +423,7 @@
                 contentGroup.rotation.y += (targetRotationY - contentGroup.rotation.y) * 0.05;
                 contentGroup.rotation.x += (targetRotationX - contentGroup.rotation.x) * 0.05;
 
-                // Gestione Hover (Solo visuale, cambio colore e scala)
+                // Gestione Hover
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(interactables);
 
