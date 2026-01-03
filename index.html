@@ -13,6 +13,7 @@
             background-color: #000; 
             font-family: 'Press Start 2P', cursive; 
             touch-action: none; /* FONDAMENTALE */
+            -webkit-tap-highlight-color: transparent; /* Rimuove il flash blu su mobile */
         }
         
         .scanlines {
@@ -76,7 +77,7 @@
         /* IL CANVAS 3D STA SOTTO A TUTTO */
         canvas { display: block; position: absolute; top:0; left:0; z-index: 1; }
 
-        /* NUOVO: TAG VERSIONE */
+        /* TAG VERSIONE */
         #version-tag {
             position: fixed; bottom: 10px; right: 10px; 
             color: #44ff44; font-size: 10px; opacity: 0.7; 
@@ -205,6 +206,7 @@
         // --- ENGINE 3D ---
         let scene, camera, renderer, contentGroup, interactables = [];
         let raycaster, mouse = {x:0, y:0};
+        let tapMouse = {x:0, y:0}; // Coordinate specifiche per il click (non influenzate dalla rotazione)
         let targetRotationX = 0, targetRotationY = 0;
         
         function init3D() {
@@ -293,26 +295,32 @@
             }, 500);
         }
 
-        // --- GESTIONE INPUT ---
+        // --- GESTIONE INPUT DESKTOP ---
         function onMouseMove(e) {
             if(isModalOpen) return;
             const mx = (e.clientX / window.innerWidth) * 2 - 1;
             const my = -(e.clientY / window.innerHeight) * 2 + 1;
             mouse.x = mx; mouse.y = my;
+            tapMouse.x = mx; tapMouse.y = my; // Su desktop coincidono sempre
             targetRotationY = mx * 3.2; 
             targetRotationX = -my * 1.8; 
         }
 
-        // MOBILE
+        // --- GESTIONE INPUT MOBILE (DEADZONE) ---
         let touchStartX = 0;
         let touchStartY = 0;
-        let hasDragged = false;
+        let isDragging = false; 
 
         function onTouchStart(e) {
             if(e.touches.length > 0) {
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
-                hasDragged = false;
+                isDragging = false; 
+                
+                // SALVA SUBITO LE COORDINATE DEL TAP
+                // Usiamo queste per il click, così anche se la camera si muove un po', il click è preciso dove hai toccato
+                tapMouse.x = (touchStartX / window.innerWidth) * 2 - 1;
+                tapMouse.y = -(touchStartY / window.innerHeight) * 2 + 1;
             }
         }
 
@@ -324,9 +332,15 @@
                 const t = e.touches[0];
                 const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
                 
-                // MODIFICA IMPORTANTE: Tolleranza aumentata a 30px
-                // Se ti muovi meno di 30px, conta ancora come click (tremore dito)
-                if(dist > 30) hasDragged = true; 
+                // --- DEADZONE LOGIC ---
+                // Se ti sei mosso meno di 20px, NON AGGIORNARE LA ROTAZIONE
+                // Questo tiene la scena FERMA mentre cerchi di cliccare
+                if(dist < 20) {
+                    return; 
+                }
+
+                // Se superi i 20px, allora stiamo trascinando
+                isDragging = true; 
 
                 const mx = (t.clientX / window.innerWidth) * 2 - 1;
                 const my = -(t.clientY / window.innerHeight) * 2 + 1;
@@ -340,9 +354,12 @@
         function onTouchEnd() {}
 
         function onCanvasClick(e) {
-            if(isModalOpen || hasDragged) return;
+            if(isModalOpen || isDragging) return;
 
-            raycaster.setFromCamera(mouse, camera);
+            // USA tapMouse INVECE DI mouse!
+            // tapMouse contiene le coordinate di quando hai appoggiato il dito,
+            // mouse contiene quelle di quando hai trascinato (che potrebbero aver spostato la camera)
+            raycaster.setFromCamera(tapMouse, camera);
             const intersects = raycaster.intersectObjects(interactables);
             
             if (intersects.length > 0) {
@@ -367,7 +384,7 @@
         window.closeModal = function() { 
             modal.style.display = 'none'; 
             isModalOpen = false; 
-            hasDragged = false;
+            isDragging = false;
         }
 
         function onResize(){
@@ -385,9 +402,12 @@
         ];
 
         window.onload = function() {
-            // SETTA IL VERSION TAG
+            // TIMESTAMP TAG
             const now = new Date();
-            document.getElementById('version-tag').innerText = "REV: " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+            const timeString = now.getHours().toString().padStart(2,'0') + ":" + 
+                               now.getMinutes().toString().padStart(2,'0') + ":" + 
+                               now.getSeconds().toString().padStart(2,'0');
+            document.getElementById('version-tag').innerText = "RELEASE: " + timeString;
 
             document.fonts.ready.then(function () {
                 const container = document.getElementById('boot-log'); let i = 0;
@@ -415,6 +435,8 @@
                 contentGroup.rotation.y += (targetRotationY - contentGroup.rotation.y) * 0.05;
                 contentGroup.rotation.x += (targetRotationX - contentGroup.rotation.x) * 0.05;
 
+                // Per l'hover su desktop usiamo mouse (dinamico), per il click mobile usiamo tapMouse (statico)
+                // Ma per l'effetto visivo di hover continuo, mouse va bene
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(interactables);
 
