@@ -2,19 +2,17 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>Carraro OS - Archive Complete</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        /* CSS FIX: Blocca zoom e rimbalzi su mobile */
+        /* CSS FIX: Blocca comportamenti nativi mobile */
         body { 
             margin: 0; 
             overflow: hidden; 
             background-color: #000; 
             font-family: 'Press Start 2P', cursive; 
-            touch-action: none; /* Impedisce scroll nativo */
-            user-select: none;
-            -webkit-user-select: none;
+            touch-action: none; /* FONDAMENTALE */
         }
         
         .scanlines {
@@ -41,7 +39,7 @@
             background: transparent; border: 2px solid #44ff44; color: #44ff44;
             padding: 15px 30px; font-family: 'Press Start 2P'; font-size: 14px; cursor: pointer;
             text-transform: uppercase; box-shadow: 0 0 10px #44ff44;
-            pointer-events: auto; /* Assicura che sia cliccabile */
+            pointer-events: auto; z-index: 1000;
         }
         #start-btn:hover { background: #44ff44; color: #000; }
 
@@ -50,18 +48,17 @@
             pointer-events: none; text-shadow: 0 0 5px #44ff44; display: none;
         }
 
-        /* MODALE */
+        /* MODALE - Z-INDEX SYSTEM CORRETTO */
         #product-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92); z-index: 2000; /* Z-index altissimo per stare sopra a tutto */
+            background: rgba(0,0,0,0.92); z-index: 2000; 
             align-items: center; justify-content: center;
-            touch-action: none;
         }
         .modal-content {
             background: #000; border: 2px solid #44ff44; box-shadow: 0 0 50px rgba(68, 255, 68, 0.4);
             padding: 30px; width: 85%; max-width: 750px; color: #44ff44; position: relative;
             display: flex; flex-direction: column; 
-            pointer-events: auto; /* Riabilita il click dentro la modale */
+            z-index: 2001; /* Sopra l'overlay */
         }
         .modal-image-container { text-align: center; margin-bottom: 25px; border-bottom: 2px dashed #44ff44; padding-bottom: 25px; background: #051505;}
         .modal-image { width: 96px; height: 96px; image-rendering: pixelated; border: 2px solid #228822; }
@@ -73,13 +70,11 @@
         .close-btn {
             margin-top: 25px; width: 100%; padding: 15px; background: #003300; border: 1px solid #44ff44; 
             color: #44ff44; font-family: 'Press Start 2P'; cursor: pointer; text-transform: uppercase; font-size: 12px;
-            pointer-events: auto; /* CRUCIALE: Rende il bottone cliccabile */
-            z-index: 2001;
         }
         .close-btn:hover { background: #44ff44; color: #000; }
         
-        /* Canvas deve stare sotto */
-        canvas { display: block; z-index: 1; }
+        /* IL CANVAS 3D STA SOTTO A TUTTO */
+        canvas { display: block; position: absolute; top:0; left:0; z-index: 1; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
@@ -94,14 +89,14 @@
     
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <div class="scanlines"></div>
-    <div id="header">MOVE TO EXPLORE // CLICK TO SELECT</div>
+    <div id="header">DESKTOP: MOUSE TO LOOK, CLICK TO SELECT <br> MOBILE: DRAG TO LOOK, TAP TO SELECT</div>
 
     <div id="product-modal">
         <div class="modal-content">
             <div class="modal-image-container"><img id="m-image" class="modal-image" src="" alt="Icon"></div>
             <div class="modal-header"><span id="m-title">TITLE</span><span id="m-year">2000</span></div>
             <div id="m-desc" class="modal-body">Description...</div>
-            <button class="close-btn" onclick="closeModal(event)">[ CHIUDI SCHEDA ]</button>
+            <button class="close-btn" onclick="closeModal()">[ CHIUDI SCHEDA ]</button>
         </div>
     </div>
 
@@ -203,9 +198,8 @@
         let raycaster, mouse = {x:0, y:0};
         let targetRotationX = 0, targetRotationY = 0;
         
-        // VARIABILI PER FIX CLICK vs DRAG
-        let dragStartX = 0, dragStartY = 0;
-        let isDragging = false;
+        // Flags per distinguere touch da mouse
+        let isTouchMoving = false; 
 
         function init3D() {
             scene = new THREE.Scene(); 
@@ -230,10 +224,19 @@
 
             raycaster = new THREE.Raycaster();
             
-            // --- EVENTI PUNTATORE UNIFICATI ---
-            document.addEventListener('pointerdown', onPointerDown);
-            document.addEventListener('pointermove', onPointerMove);
-            document.addEventListener('pointerup', onPointerUp);
+            // --- EVENTI SEPARATI PER EVITARE CONFLITTI ---
+            
+            // 1. DESKTOP (Mouse)
+            document.addEventListener('mousemove', onMouseMove);
+            
+            // 2. MOBILE (Touch)
+            document.addEventListener('touchstart', onTouchStart, {passive: false});
+            document.addEventListener('touchmove', onTouchMove, {passive: false});
+            document.addEventListener('touchend', onTouchEnd);
+            
+            // 3. CLICK UNIFICATO (Per selezione)
+            renderer.domElement.addEventListener('click', onCanvasClick);
+            
             window.addEventListener('resize', onResize);
 
             loadScene("HOME");
@@ -291,55 +294,76 @@
             }, 500);
         }
 
-        // --- LOGICA INPUT CORRETTA ---
+        // --- GESTIONE INPUT SEPARATA E PULITA ---
         
-        function onPointerDown(e) {
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-            isDragging = false; // Reset drag status
-        }
-
-        function onPointerMove(e) {
+        // 1. DESKTOP: Il mouse sposta la vista solo muovendosi (HOVER)
+        function onMouseMove(e) {
             if(isModalOpen) return;
-
-            // FIX NAVIGAZIONE: Calcolo coordinate (Invertiti i segni per naturalezza)
-            // Se trascini a sinistra (negativo), vogliamo ruotare verso destra (positivo o viceversa a seconda dell'asse)
+            // Normalizza coordinate (-1 a +1)
             const mx = (e.clientX / window.innerWidth) * 2 - 1;
             const my = -(e.clientY / window.innerHeight) * 2 + 1;
             
-            // Aggiorna mouse per il raycasting (hover)
-            mouse.x = mx; 
-            mouse.y = my;
+            mouse.x = mx; mouse.y = my;
             
-            // Calcolo rotazione (invertito rispetto a prima)
-            targetRotationY = -mx * 1.5; // Meno davanti a mx inverte l'asse orizzontale
-            targetRotationX = my * 1.0;  // my positivo per asse verticale
-            
-            // Controlla se è un vero trascinamento o un micro-movimento involontario
-            if (e.pointerType !== 'mouse' && e.isPrimary) {
-                 // Per touch, consideriamo drag solo se ci si muove un po'
-                 // Non serve logica complessa qui perché la rotazione avviene sempre, 
-                 // ma il CLICK avverrà solo se la distanza è piccola (vedi onPointerUp)
+            // Sensibilità ridotta (0.8) per non far "scappare" la scena
+            targetRotationY = mx * 0.8;
+            targetRotationX = -my * 0.5;
+        }
+
+        // 2. MOBILE: Variabili per gestire Tap vs Drag
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let hasDragged = false;
+
+        function onTouchStart(e) {
+            if(e.touches.length > 0) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                hasDragged = false;
             }
         }
 
-        function onPointerUp(e) {
-            // Se la modale è aperta, non fare nulla (gestito dai bottoni HTML)
+        function onTouchMove(e) {
             if(isModalOpen) return;
+            e.preventDefault(); // Blocca scroll pagina
+            
+            if(e.touches.length > 0) {
+                const t = e.touches[0];
+                
+                // Calcola distanza dal tocco iniziale
+                const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
+                if(dist > 10) hasDragged = true; // Se muovi > 10px è un drag
 
-            // Calcola quanto ci siamo mossi dal punto di inizio
-            const dist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
+                // Logica rotazione Mobile (simile a Desktop ma basata su touch)
+                const mx = (t.clientX / window.innerWidth) * 2 - 1;
+                const my = -(t.clientY / window.innerHeight) * 2 + 1;
+                
+                mouse.x = mx; mouse.y = my;
+                targetRotationY = mx * 1.5; // Più sensibile su mobile
+                targetRotationX = -my * 1.0;
+            }
+        }
+        
+        function onTouchEnd() {
+            // Reset immediato coordinate mouse per non lasciare "selezionato" l'ultimo punto toccato
+            // mouse.x = -9999; mouse.y = -9999; 
+        }
 
-            // FIX CLICK: Se ci siamo mossi meno di 10 pixel, è un CLICK. Altrimenti è un DRAG.
-            if (dist < 10) {
-                // Esegue il raycasting per cliccare l'oggetto
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(interactables);
-                if (intersects.length > 0) {
-                    const obj = intersects[0].object;
-                    if(obj.userData.target) loadScene(obj.userData.target);
-                    else if(obj.userData.details) openModal(obj.userData.text, obj.userData.details);
-                }
+        // 3. CLICK (Funziona sia Desktop che Tap Mobile)
+        function onCanvasClick(e) {
+            if(isModalOpen) return;
+            
+            // Su mobile, se abbiamo trascinato, NON cliccare
+            if(hasDragged) return;
+
+            // Aggiorna raycaster sulle coordinate attuali del mouse/tocco
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactables);
+            
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                if(obj.userData.target) loadScene(obj.userData.target);
+                else if(obj.userData.details) openModal(obj.userData.text, obj.userData.details);
             }
         }
 
@@ -355,11 +379,12 @@
             isModalOpen = true;
         }
 
-        // FIX TASTO CHIUDI: Usa window.closeModal e accetta l'evento per fermare la propagazione
-        window.closeModal = function(e) { 
-            if(e) e.stopPropagation(); // Evita che il click passi sotto
+        // Funzione globale chiusura modale (accessibile dall'HTML)
+        window.closeModal = function() { 
             modal.style.display = 'none'; 
             isModalOpen = false; 
+            // Reset del flag drag per sicurezza
+            hasDragged = false;
         }
 
         function onResize(){
@@ -400,10 +425,11 @@
             requestAnimationFrame(animate); TWEEN.update(time);
 
             if(!isModalOpen && contentGroup) {
+                // Rotazione fluida verso il target
                 contentGroup.rotation.y += (targetRotationY - contentGroup.rotation.y) * 0.05;
                 contentGroup.rotation.x += (targetRotationX - contentGroup.rotation.x) * 0.05;
 
-                // Gestione Hover (Solo visuale)
+                // Gestione Hover (Solo visuale, cambio colore e scala)
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(interactables);
 
