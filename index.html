@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Carraro OS - Mouse Fixed</title>
+    <title>Carraro OS - Drag Unified</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -61,7 +61,8 @@
             margin-top: 25px; width: 100%; padding: 15px; background: #003300; border: 1px solid #44ff44; 
             color: #44ff44; font-family: 'Press Start 2P'; cursor: pointer; text-transform: uppercase; font-size: 12px;
         }
-        canvas { display: block; position: absolute; top:0; left:0; z-index: 1; }
+        canvas { display: block; position: absolute; top:0; left:0; z-index: 1; cursor: grab; }
+        canvas:active { cursor: grabbing; } /* Cursore che afferra */
         
         #version-tag {
             position: fixed; bottom: 10px; right: 10px; background-color: #aa0000; color: #fff; padding: 5px;
@@ -81,8 +82,8 @@
     
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <div class="scanlines"></div>
-    <div id="header">DESKTOP: MOUSE TO LOOK <br> MOBILE: DRAG TO MOVE</div>
-    <div id="version-tag">MOUSE FIX</div>
+    <div id="header">DRAG TO ROTATE // CLICK TO SELECT</div>
+    <div id="version-tag">DRAG UNIFIED</div>
 
     <div id="product-modal">
         <div class="modal-content">
@@ -98,7 +99,7 @@
             const now = new Date();
             const timeString = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0') + ":" + now.getSeconds().toString().padStart(2,'0');
             const tag = document.getElementById('version-tag');
-            if(tag) tag.innerText = "MOUSE FIX: " + timeString;
+            if(tag) tag.innerText = "DRAG UNIFIED: " + timeString;
         })();
 
         // --- ASSETS ---
@@ -173,21 +174,18 @@
         let interactables = [];
         let raycaster, mouse = {x: -1000, y: -1000}; 
         
-        // Variabili rotazione
+        // VARIABILI ROTAZIONE
         let targetRotationX = 0, targetRotationY = 0;
         
-        // Variabili Mobile Drag
+        // VARIABILI INPUT
         let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
         let onPointerDownLon = 0, onPointerDownLat = 0;
-        let isUserInteracting = false;
+        let isDragging = false;
         
-        // Rilevamento Device
-        const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-
         function init3D() {
             scene = new THREE.Scene(); 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 1, 1000);
-            camera.position.z = 100; 
+            camera.position.z = 100; // CAMERA LONTANA
             camera.lookAt(0,0,0);
             
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -206,88 +204,56 @@
 
             raycaster = new THREE.Raycaster();
             
-            // --- GESTIONE INPUT SEPARATA DESKTOP / MOBILE ---
-            
-            if (isMobile) {
-                // MOBILE: Touch per rotazione (Drag) + Tap per click
-                document.addEventListener('touchstart', onTouchStart, {passive: false});
-                document.addEventListener('touchmove', onTouchMove, {passive: false});
-                document.addEventListener('touchend', onTouchEnd, {passive: false});
-            } else {
-                // DESKTOP: Mouse per Parallasse + Click normale
-                document.addEventListener('mousemove', onMouseMoveDesktop);
-                document.addEventListener('click', onClickDesktop);
-            }
-
+            // --- EVENTI UNIFICATI: Pointer Events (Funziona Mouse e Touch) ---
+            document.addEventListener('pointerdown', onPointerDown);
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
             window.addEventListener('resize', onResize);
 
             loadScene("HOME");
             animate();
         }
 
-        // --- FUNZIONI DESKTOP ---
-        function onMouseMoveDesktop(e) {
+        // --- GESTIONE INPUT "CLICCA E TRASCINA" (Desktop & Mobile) ---
+        function onPointerDown(e) {
             if(isModalOpen) return;
-            // Normalizza coordinate per raycaster
+            isDragging = true;
+            onPointerDownPointerX = e.clientX;
+            onPointerDownPointerY = e.clientY;
+            onPointerDownLon = targetRotationY;
+            onPointerDownLat = targetRotationX;
+        }
+
+        function onPointerMove(e) {
+            if(isModalOpen) return;
+            
+            // Aggiorna sempre il mouse per l'hover, ma NON ruota la scena se non trascini
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
-            // Parallasse leggera: la scena si inclina seguendo il mouse
-            targetRotationY = mouse.x * 0.3; 
-            targetRotationX = -mouse.y * 0.2;
+            if(!isDragging) return;
+
+            const deltaX = e.clientX - onPointerDownPointerX;
+            const deltaY = e.clientY - onPointerDownPointerY;
+
+            // Logica Rotazione (Stessa per Desktop e Mobile)
+            targetRotationY = onPointerDownLon + deltaX * 0.005;
+            targetRotationX = onPointerDownLat + deltaY * 0.005;
         }
 
-        function onClickDesktop(e) {
-            if(isModalOpen) return;
-            // Esegui click
-            checkIntersection(true);
-        }
+        function onPointerUp(e) {
+            if(!isDragging) return;
+            isDragging = false;
 
-        // --- FUNZIONI MOBILE (DRAG LOGIC) ---
-        function onTouchStart(e) {
-            if(isModalOpen) return;
-            if(e.touches.length === 1) {
-                isUserInteracting = true;
-                onPointerDownPointerX = e.touches[0].clientX;
-                onPointerDownPointerY = e.touches[0].clientY;
-                onPointerDownLon = targetRotationY; 
-                onPointerDownLat = targetRotationX;
-            }
-        }
-
-        function onTouchMove(e) {
-            if(isModalOpen || !isUserInteracting) return;
-            e.preventDefault(); 
+            // Calcola se è stato un click o un trascinamento
+            const dist = Math.hypot(e.clientX - onPointerDownPointerX, e.clientY - onPointerDownPointerY);
             
-            const touchX = e.touches[0].clientX;
-            const touchY = e.touches[0].clientY;
-            const deltaX = touchX - onPointerDownPointerX;
-            const deltaY = touchY - onPointerDownPointerY;
-
-            // Deadzone per evitare che un tap diventi un drag
-            if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) return;
-
-            // Rotazione additiva (Drag to spin)
-            targetRotationY = onPointerDownLon + deltaX * 0.005; 
-            targetRotationX = onPointerDownLat + deltaY * 0.005; 
-        }
-
-        function onTouchEnd(e) {
-            isUserInteracting = false;
-            if(e.changedTouches.length > 0) {
-                const t = e.changedTouches[0];
-                const dist = Math.hypot(t.clientX - onPointerDownPointerX, t.clientY - onPointerDownPointerY);
-                
-                // Se il dito si è mosso poco (< 20px), è un CLICK
-                if(dist < 20) { 
-                    mouse.x = (t.clientX / window.innerWidth) * 2 - 1;
-                    mouse.y = -(t.clientY / window.innerHeight) * 2 + 1;
-                    checkIntersection(true); 
-                }
+            // Se mosso poco (< 10px), consideralo un CLICK
+            if(dist < 10) { 
+                checkIntersection(true); // Esegui click
             }
         }
 
-        // --- CORE 3D ---
         function checkIntersection(isClick) {
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(contentGroup.children);
@@ -295,7 +261,7 @@
             if (intersects.length > 0) {
                 const obj = intersects[0].object;
                 if(!isClick) {
-                    // HOVER (Solo Desktop visualmente)
+                    // HOVER (Solo visivo)
                     if(obj !== hoveredObj) {
                         if(hoveredObj) new TWEEN.Tween(hoveredObj.scale).to({x: hoveredObj.userData.baseScale.x, y: hoveredObj.userData.baseScale.y}, 200).start();
                         hoveredObj = obj;
@@ -408,13 +374,20 @@
         function animate(time) {
             requestAnimationFrame(animate); TWEEN.update(time);
 
+            // ANIMAZIONE AUTONOMA (Idle Rotation)
+            // Ruota pianissimo SOLO se l'utente non sta trascinando
+            if(!isDragging && !isModalOpen) {
+                targetRotationY += 0.001; 
+            }
+
             if(contentGroup) {
+                // Interpolazione fluida per seguire targetRotation (che sia manuale o automatico)
                 contentGroup.rotation.y += (targetRotationY - contentGroup.rotation.y) * 0.1;
                 contentGroup.rotation.x += (targetRotationX - contentGroup.rotation.x) * 0.1;
             }
 
-            // Su DESKTOP controlliamo l'hover continuo
-            if(!isMobile && !isModalOpen) checkIntersection(false);
+            // Su desktop, eseguiamo checkIntersection per l'effetto hover
+            if(!isDragging && !isModalOpen) checkIntersection(false);
 
             if(renderer && scene && camera) renderer.render(scene, camera);
         }
