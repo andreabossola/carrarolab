@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Carraro OS - Fixed Layout</title>
+    <title>Carraro OS - Camera Fixed</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -16,10 +16,9 @@
             background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.05));
             background-size: 100% 4px; pointer-events: none; z-index: 50;
         }
-        /* BOOT SCREEN RIPRISTINATO */
         #boot-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000; z-index: 9999; /* Z-Index altissimo */
+            background-color: #000; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         #boot-log { 
@@ -31,7 +30,7 @@
         @keyframes fadeIn { to { opacity: 1; } }
         
         #start-btn {
-            margin-top: 20px; display: none; /* Parte nascosto */
+            margin-top: 20px; display: none;
             background: transparent; border: 2px solid #44ff44; color: #44ff44;
             padding: 15px 30px; font-family: 'Press Start 2P'; font-size: 14px; cursor: pointer;
             text-transform: uppercase; box-shadow: 0 0 10px #44ff44; pointer-events: auto;
@@ -62,9 +61,10 @@
             color: #44ff44; font-family: 'Press Start 2P'; cursor: pointer; text-transform: uppercase; font-size: 12px;
         }
         canvas { display: block; position: absolute; top:0; left:0; z-index: 1; }
+        
         #version-tag {
-            position: fixed; bottom: 10px; right: 10px; background-color: #004400; color: #fff; padding: 5px;
-            font-size: 10px; border: 1px solid #44ff44; z-index: 10000; pointer-events: none; opacity: 0.8;
+            position: fixed; bottom: 10px; right: 10px; background-color: #0000aa; color: #fff; padding: 5px;
+            font-size: 10px; border: 1px solid #aaaaff; z-index: 10000; pointer-events: none; opacity: 0.9;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -81,7 +81,7 @@
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <div class="scanlines"></div>
     <div id="header">DESKTOP: MOUSE TO LOOK <br> MOBILE: DRAG TO MOVE</div>
-    <div id="version-tag">LAYOUT FIX</div>
+    <div id="version-tag">CAMERA FIX</div>
 
     <div id="product-modal">
         <div class="modal-content">
@@ -93,6 +93,13 @@
     </div>
 
     <script>
+        (function updateTimestamp() {
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0') + ":" + now.getSeconds().toString().padStart(2,'0');
+            const tag = document.getElementById('version-tag');
+            if(tag) tag.innerText = "CAMERA FIX: " + timeString;
+        })();
+
         // --- ASSETS ---
         function generateRetroImage(type) {
             const c = document.createElement('canvas'); c.width = 64; c.height = 64; const ctx = c.getContext('2d');
@@ -108,36 +115,36 @@
         const archiveWords = ["M9 Museum", "Brixia Time Machine", "Cenacolo Vinciano", "Tharros", "Bibleworld", "Museo Egizio", "Valle dei Templi", "Arena Verona", "Matera Sassi", "Teatro La Fenice", "Duomo Milano", "Parco Leonardo", "Immersive Academia", "Palazzo Reale", "Street View 2006", "Leonardo", "Dante", "Giotto", "Pompei", "Venezia", "Milano"];
 
         // --- SCENE CONFIG ---
-        // RIPRISTINATE SCALE PIÙ PICCOLE E DISTANZIATE
+        // Scala ricalibrata per la nuova distanza della telecamera (Z=110)
         const SCENES = {
             "HOME": [
-                { text: "CHI SIAMO", target: "CHI_SIAMO", x: 0, y: 15, z: 0, color: "#44ff44", scale: 2.0 }, // Ridotto da 2.5
-                { text: "COSA FACCIAMO", target: "COSA_FACCIAMO", x: -40, y: 0, z: 0, color: "#44ff44", scale: 2.0 },
-                { text: "PRODOTTI", target: "PRODOTTI", x: 0, y: -15, z: 0, color: "#44ff44", scale: 2.0 },
-                { text: "VISION", target: "VISION", x: 40, y: 0, z: 0, color: "#44ff44", scale: 2.0 }
+                { text: "CHI SIAMO", target: "CHI_SIAMO", x: 0, y: 15, z: 0, color: "#44ff44", scale: 4.0 }, 
+                { text: "COSA FACCIAMO", target: "COSA_FACCIAMO", x: -40, y: 0, z: 0, color: "#44ff44", scale: 4.0 },
+                { text: "PRODOTTI", target: "PRODOTTI", x: 0, y: -15, z: 0, color: "#44ff44", scale: 4.0 },
+                { text: "VISION", target: "VISION", x: 40, y: 0, z: 0, color: "#44ff44", scale: 4.0 }
             ],
             "CHI_SIAMO": [
-                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 1.5 },
-                { text: "GUALTIERO", x: -25, y: 0, z: 0, color: "#00ffff", scale: 1.5, details: {year:"FOUNDER", image:assets.logo, tech:"STRATEGY", desc:"Gualtiero Carraro."} },
-                { text: "ROBERTO", x: 25, y: 0, z: 0, color: "#00ffff", scale: 1.5, details: {year:"FOUNDER", image:assets.logo, tech:"DEV", desc:"Roberto Carraro."} }
+                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 3.5 },
+                { text: "GUALTIERO", x: -25, y: 0, z: 0, color: "#00ffff", scale: 3.5, details: {year:"FOUNDER", image:assets.logo, tech:"STRATEGY", desc:"Gualtiero Carraro."} },
+                { text: "ROBERTO", x: 25, y: 0, z: 0, color: "#00ffff", scale: 3.5, details: {year:"FOUNDER", image:assets.logo, tech:"DEV", desc:"Roberto Carraro."} }
             ],
             "COSA_FACCIAMO": [
-                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 1.5 },
-                { text: "VR / AR", x: -25, y: 0, z: 0, color: "#ff00ff", scale: 1.5, details: {year:"XR", image:assets.vr, tech:"VR", desc:"Ambienti immersivi."} },
-                { text: "AI GEN", x: 25, y: 0, z: 0, color: "#ff00ff", scale: 1.5, details: {year:"AI", image:assets.logo, tech:"GPT", desc:"Intelligenza Artificiale."} }
+                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 3.5 },
+                { text: "VR / AR", x: -25, y: 0, z: 0, color: "#ff00ff", scale: 3.5, details: {year:"XR", image:assets.vr, tech:"VR", desc:"Ambienti immersivi."} },
+                { text: "AI GEN", x: 25, y: 0, z: 0, color: "#ff00ff", scale: 3.5, details: {year:"AI", image:assets.logo, tech:"GPT", desc:"Intelligenza Artificiale."} }
             ],
             "VISION": [
-                { text: "< HOME", target: "HOME", x: 0, y: 40, z: 0, color: "#ff4444", scale: 1.5 },
-                { text: "NEURAL UI", x: 0, y: 0, z: 0, color: "#ffffff", scale: 1.5, details: {year:"R&D", image:assets.vr, tech:"BCI", desc:"Interfacce Neurali."} },
-                { text: "AI ETHICS", x: -35, y: -15, z: 0, color: "#ffffff", scale: 1.5, details: {year:"ETHICS", image:assets.logo, tech:"HUMANISM", desc:"Umanesimo Digitale."} },
-                { text: "SPATIAL WEB", x: 35, y: -15, z: 0, color: "#ffffff", scale: 1.5, details: {year:"WEB3", image:assets.tab, tech:"XR", desc:"Spatial Computing."} }
+                { text: "< HOME", target: "HOME", x: 0, y: 40, z: 0, color: "#ff4444", scale: 3.5 },
+                { text: "NEURAL UI", x: 0, y: 0, z: 0, color: "#ffffff", scale: 3.5, details: {year:"R&D", image:assets.vr, tech:"BCI", desc:"Interfacce Neurali."} },
+                { text: "AI ETHICS", x: -35, y: -15, z: 0, color: "#ffffff", scale: 3.5, details: {year:"ETHICS", image:assets.logo, tech:"HUMANISM", desc:"Umanesimo Digitale."} },
+                { text: "SPATIAL WEB", x: 35, y: -15, z: 0, color: "#ffffff", scale: 3.5, details: {year:"WEB3", image:assets.tab, tech:"XR", desc:"Spatial Computing."} }
             ],
             "PRODOTTI": [] 
         };
 
         function generateProductSphere() {
             const items = [];
-            items.push({ text: "< HOME", target: "HOME", x: 0, y: 35, z: -10, color: "#ff4444", scale: 1.8 });
+            items.push({ text: "< HOME", target: "HOME", x: 0, y: 35, z: -10, color: "#ff4444", scale: 3.5 });
             const heroes = [
                 { t:"OMNIA", y:"1996-2005", i:assets.cd, tech:"HERO", d:"OMNIA - ENCICLOPEDIA MULTIMEDIALE" },
                 { t:"ROMA 3D", y:"2011", i:assets.tab, tech:"HERO", d:"VIRTUAL HISTORY ROMA" },
@@ -147,16 +154,15 @@
             ];
             heroes.forEach((h, i) => {
                 const angle = (i / heroes.length) * Math.PI * 2;
-                // Raggio aumentato (da 45 a 55) per distanziare, Scala ridotta (da 2.5 a 1.6) per non coprire
-                items.push({ text: h.t, x: Math.cos(angle)*55, y: 0, z: Math.sin(angle)*55, color: "#ffff00", scale: 1.6, details: {year:h.y, desc:h.d, tech:"HERO", image:h.i} });
+                items.push({ text: h.t, x: Math.cos(angle)*55, y: 0, z: Math.sin(angle)*55, color: "#ffff00", scale: 3.8, details: {year:h.y, desc:h.d, tech:"HERO", image:h.i} });
             });
-            const count = 30; const radius = 75; // Raggio aumentato per lo sfondo
+            const count = 30; const radius = 75; 
             const goldenRatio = (1 + Math.sqrt(5)) / 2;
             for(let i=0; i<count; i++) {
                 const label = archiveWords[i % archiveWords.length];
                 const theta = 2 * Math.PI * i / goldenRatio;
                 const phi = Math.acos(1 - 2 * (i + 0.5) / count);
-                items.push({ text: label, x: Math.cos(theta)*Math.sin(phi)*radius, y: Math.sin(theta)*Math.sin(phi)*radius, z: Math.cos(phi)*radius, color: "#00aa00", scale: 1.0, details: {year:"ARCHIVE", desc:"Archivio.", tech:"LEGACY", image:assets.file} });
+                items.push({ text: label, x: Math.cos(theta)*Math.sin(phi)*radius, y: Math.sin(theta)*Math.sin(phi)*radius, z: Math.cos(phi)*radius, color: "#00aa00", scale: 2.0, details: {year:"ARCHIVE", desc:"Archivio.", tech:"LEGACY", image:assets.file} });
             }
             return items;
         }
@@ -166,20 +172,19 @@
         let scene, camera, renderer, contentGroup, interactables = [];
         let raycaster, mouse = {x: -1000, y: -1000}; 
         
-        // VARIABILI DI ROTAZIONE
         let lon = 0, lat = 0; 
         let phi = 0, theta = 0;
         let targetLon = 0, targetLat = 0; 
         
-        // VARIABILI DRAG MOBILE
         let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
         let onPointerDownLon = 0, onPointerDownLat = 0;
         let isUserInteracting = false;
         
         function init3D() {
             scene = new THREE.Scene(); 
-            // FOV aumentato a 75 per vedere più roba (allontana l'effetto zoom)
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 1000);
+            // CAMERA FIX: Spostata indietro a 110!
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 1, 1000);
+            camera.position.z = 110; 
             
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -197,7 +202,6 @@
 
             raycaster = new THREE.Raycaster();
             
-            // EVENTI
             document.addEventListener('touchstart', onTouchStart, {passive: false});
             document.addEventListener('touchmove', onTouchMove, {passive: false});
             document.addEventListener('touchend', onTouchEnd, {passive: false});
@@ -210,7 +214,6 @@
             animate();
         }
 
-        // --- LOGICA MOBILE (DRAG RELATIVO) ---
         function onTouchStart(e) {
             if(isModalOpen) return;
             if(e.touches.length === 1) {
@@ -228,13 +231,11 @@
             
             const touchX = e.touches[0].clientX;
             const touchY = e.touches[0].clientY;
-            
             const deltaX = touchX - onPointerDownPointerX;
             const deltaY = touchY - onPointerDownPointerY;
 
             if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) return;
 
-            // Sensibilità ridotta (0.2) per controllo migliore
             targetLon = onPointerDownLon - deltaX * 0.2; 
             targetLat = onPointerDownLat + deltaY * 0.2; 
         }
@@ -245,8 +246,6 @@
             if(e.changedTouches.length > 0) {
                 const t = e.changedTouches[0];
                 const dist = Math.hypot(t.clientX - onPointerDownPointerX, t.clientY - onPointerDownPointerY);
-                
-                // Deadzone per click aumentata leggermente a 15px
                 if(dist < 15) { 
                     mouse.x = (t.clientX / window.innerWidth) * 2 - 1;
                     mouse.y = -(t.clientY / window.innerHeight) * 2 + 1;
@@ -255,7 +254,6 @@
             }
         }
 
-        // --- LOGICA DESKTOP (HOVER) ---
         function onMouseMove(e) {
             if(isModalOpen || isUserInteracting) return;
             const mx = (e.clientX / window.innerWidth) * 2 - 1;
@@ -272,7 +270,6 @@
             if(e.button === 0) checkIntersection(true); 
         }
 
-        // --- CORE 3D ---
         function checkIntersection(isClick) {
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(interactables);
@@ -342,7 +339,6 @@
             }, 350);
         }
 
-        // --- UI & BOOT (RIPRISTINATO) ---
         const modal = document.getElementById('product-modal'); let isModalOpen = false;
         function openModal(title, d) {
             document.getElementById('m-title').innerText = title;
@@ -353,7 +349,6 @@
         }
         window.closeModal = function() { modal.style.display = 'none'; isModalOpen = false; }
         
-        // BOOT LOGIC ORIGINALE
         const bootLogs = [
             "SYSTEM: CARRARO LAB ARCHIVE LOADING...", 
             "> PREMIO MOEBIUS LUGANO (CULTURA CAMPANIA)", 
@@ -368,7 +363,7 @@
                 function printLog() {
                     if(i < bootLogs.length) {
                         const div = document.createElement('div'); div.className = 'log-line'; div.innerText = bootLogs[i];
-                        container.appendChild(div); i++; setTimeout(printLog, 300); // Rallentato a 300ms
+                        container.appendChild(div); i++; setTimeout(printLog, 300);
                     } else { document.getElementById('start-btn').style.display='inline-block'; }
                 }
                 setTimeout(printLog, 500);
