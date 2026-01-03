@@ -71,7 +71,6 @@
 
     <div id="boot-screen">
         <img src="twins.png" style="width: 280px; margin-bottom: 30px; image-rendering: pixelated;" alt="Twins">
-        
         <div id="boot-log"></div>
         <button id="start-btn" onclick="startSystem()">[ ACCEDI ALL'ARCHIVIO ]</button>
     </div>
@@ -112,7 +111,6 @@
                 { text: "PRODOTTI", target: "PRODOTTI", x: 0, y: -15, z: 0, color: "#44ff44", scale: 2.0 },
                 { text: "VISION", target: "VISION", x: 40, y: 0, z: 0, color: "#44ff44", scale: 2.0 }
             ],
-            // REMOVED IMAGE FROM HERE TO FIX VISIBILITY
             "CHI_SIAMO": [
                 { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 1.5 },
                 { text: "GUALTIERO", x: -25, y: 0, z: 0, color: "#00ffff", scale: 1.5, details: {
@@ -135,7 +133,6 @@
                     desc:"Intelligenza Artificiale Generativa applicata alla cultura. Sviluppo di assistenti virtuali, generazione automatica di contenuti storici e piattaforme per la Scuola 4.0."} 
                 }
             ],
-            // --- VISION AGGIORNATA (3 Tasti) ---
             "VISION": [
                 { text: "< HOME", target: "HOME", x: 0, y: 40, z: 0, color: "#ff4444", scale: 1.5 },
                 
@@ -245,7 +242,13 @@
 
             raycaster = new THREE.Raycaster();
             
+            // LISTENERS
             window.addEventListener('mousemove', onMouseMove);
+            
+            // TOUCH LISTENERS AGGIUNTI
+            window.addEventListener('touchstart', onTouchStart, {passive: false});
+            window.addEventListener('touchmove', onTouchMove, {passive: false});
+
             window.addEventListener('click', onClick);
             window.addEventListener('resize', onResize);
 
@@ -312,6 +315,30 @@
             const my = -(e.clientY / window.innerHeight) * 2 + 1;
             mouse.x = mx; mouse.y = my;
             targetRotationY = mx * 1.5; targetRotationX = -my * 1.0; 
+        }
+
+        // NUOVE FUNZIONI TOUCH
+        function onTouchStart(e) {
+             if(isModalOpen) return;
+             if(e.touches.length > 0) {
+                 const t = e.touches[0];
+                 const mx = (t.clientX / window.innerWidth) * 2 - 1;
+                 const my = -(t.clientY / window.innerHeight) * 2 + 1;
+                 mouse.x = mx; mouse.y = my;
+                 targetRotationY = mx * 1.5; targetRotationX = -my * 1.0;
+             }
+        }
+
+        function onTouchMove(e) {
+            if(isModalOpen) return;
+            e.preventDefault(); // IMPORTANTE: Blocca lo scroll della pagina
+            if(e.touches.length > 0) {
+                const t = e.touches[0];
+                const mx = (t.clientX / window.innerWidth) * 2 - 1;
+                const my = -(t.clientY / window.innerHeight) * 2 + 1;
+                mouse.x = mx; mouse.y = my;
+                targetRotationY = mx * 1.5; targetRotationX = -my * 1.0; 
+            }
         }
 
         let hoveredObj = null;
