@@ -13,7 +13,7 @@
             background-color: #000; 
             font-family: 'Press Start 2P', cursive; 
             touch-action: none; /* FONDAMENTALE */
-            -webkit-tap-highlight-color: transparent; /* Rimuove il flash blu su mobile */
+            -webkit-tap-highlight-color: transparent;
         }
         
         .scanlines {
@@ -49,7 +49,7 @@
             pointer-events: none; text-shadow: 0 0 5px #44ff44; display: none;
         }
 
-        /* MODALE - Z-INDEX SYSTEM CORRETTO */
+        /* MODALE */
         #product-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.92); z-index: 2000; 
@@ -59,7 +59,7 @@
             background: #000; border: 2px solid #44ff44; box-shadow: 0 0 50px rgba(68, 255, 68, 0.4);
             padding: 30px; width: 85%; max-width: 750px; color: #44ff44; position: relative;
             display: flex; flex-direction: column; 
-            z-index: 2001; /* Sopra l'overlay */
+            z-index: 2001; 
         }
         .modal-image-container { text-align: center; margin-bottom: 25px; border-bottom: 2px dashed #44ff44; padding-bottom: 25px; background: #051505;}
         .modal-image { width: 96px; height: 96px; image-rendering: pixelated; border: 2px solid #228822; }
@@ -74,14 +74,14 @@
         }
         .close-btn:hover { background: #44ff44; color: #000; }
         
-        /* IL CANVAS 3D STA SOTTO A TUTTO */
         canvas { display: block; position: absolute; top:0; left:0; z-index: 1; }
 
-        /* TAG VERSIONE */
+        /* TAG VERSIONE - DEBUG STYLE (ROSSO PER VISIBILITA') */
         #version-tag {
             position: fixed; bottom: 10px; right: 10px; 
-            color: #44ff44; font-size: 10px; opacity: 0.7; 
-            z-index: 9999; pointer-events: none;
+            background-color: #aa0000; color: #ffffff; padding: 5px;
+            font-size: 12px; font-weight: bold; border: 1px solid #fff;
+            z-index: 10000; pointer-events: none;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -98,7 +98,8 @@
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <div class="scanlines"></div>
     <div id="header">DESKTOP: MOUSE TO LOOK, CLICK TO SELECT <br> MOBILE: DRAG TO LOOK, TAP TO SELECT</div>
-    <div id="version-tag"></div>
+    
+    <div id="version-tag">LOADING...</div>
 
     <div id="product-modal">
         <div class="modal-content">
@@ -110,6 +111,16 @@
     </div>
 
     <script>
+        // --- AGGIORNAMENTO IMMEDIATO TIMESTAMP ---
+        (function updateTimestamp() {
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2,'0') + ":" + 
+                               now.getMinutes().toString().padStart(2,'0') + ":" + 
+                               now.getSeconds().toString().padStart(2,'0');
+            const tag = document.getElementById('version-tag');
+            if(tag) tag.innerText = "REV: " + timeString;
+        })();
+
         // --- ASSETS ---
         function generateRetroImage(type) {
             const c = document.createElement('canvas'); c.width = 64; c.height = 64; const ctx = c.getContext('2d');
@@ -206,7 +217,7 @@
         // --- ENGINE 3D ---
         let scene, camera, renderer, contentGroup, interactables = [];
         let raycaster, mouse = {x:0, y:0};
-        let tapMouse = {x:0, y:0}; // Coordinate specifiche per il click (non influenzate dalla rotazione)
+        let tapMouse = {x:0, y:0}; 
         let targetRotationX = 0, targetRotationY = 0;
         
         function init3D() {
@@ -317,8 +328,7 @@
                 touchStartY = e.touches[0].clientY;
                 isDragging = false; 
                 
-                // SALVA SUBITO LE COORDINATE DEL TAP
-                // Usiamo queste per il click, così anche se la camera si muove un po', il click è preciso dove hai toccato
+                // SALVA COORDINATE TAP (ferme)
                 tapMouse.x = (touchStartX / window.innerWidth) * 2 - 1;
                 tapMouse.y = -(touchStartY / window.innerHeight) * 2 + 1;
             }
@@ -332,14 +342,12 @@
                 const t = e.touches[0];
                 const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
                 
-                // --- DEADZONE LOGIC ---
-                // Se ti sei mosso meno di 20px, NON AGGIORNARE LA ROTAZIONE
-                // Questo tiene la scena FERMA mentre cerchi di cliccare
+                // --- DEADZONE LOGIC (20px) ---
                 if(dist < 20) {
-                    return; 
+                    return; // NON muovere la scena se il dito trema
                 }
 
-                // Se superi i 20px, allora stiamo trascinando
+                // Se superi i 20px, ruota la scena
                 isDragging = true; 
 
                 const mx = (t.clientX / window.innerWidth) * 2 - 1;
@@ -356,9 +364,7 @@
         function onCanvasClick(e) {
             if(isModalOpen || isDragging) return;
 
-            // USA tapMouse INVECE DI mouse!
-            // tapMouse contiene le coordinate di quando hai appoggiato il dito,
-            // mouse contiene quelle di quando hai trascinato (che potrebbero aver spostato la camera)
+            // USA tapMouse (dove hai toccato) non mouse (dove si è mossa la camera)
             raycaster.setFromCamera(tapMouse, camera);
             const intersects = raycaster.intersectObjects(interactables);
             
@@ -402,13 +408,6 @@
         ];
 
         window.onload = function() {
-            // TIMESTAMP TAG
-            const now = new Date();
-            const timeString = now.getHours().toString().padStart(2,'0') + ":" + 
-                               now.getMinutes().toString().padStart(2,'0') + ":" + 
-                               now.getSeconds().toString().padStart(2,'0');
-            document.getElementById('version-tag').innerText = "RELEASE: " + timeString;
-
             document.fonts.ready.then(function () {
                 const container = document.getElementById('boot-log'); let i = 0;
                 function printLog() {
@@ -435,8 +434,6 @@
                 contentGroup.rotation.y += (targetRotationY - contentGroup.rotation.y) * 0.05;
                 contentGroup.rotation.x += (targetRotationX - contentGroup.rotation.x) * 0.05;
 
-                // Per l'hover su desktop usiamo mouse (dinamico), per il click mobile usiamo tapMouse (statico)
-                // Ma per l'effetto visivo di hover continuo, mouse va bene
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(interactables);
 
