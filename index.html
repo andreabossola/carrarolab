@@ -6,13 +6,15 @@
     <title>Carraro OS - Archive Complete</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        /* AGGIUNTO touch-action: none PER IL MOBILE */
+        /* CSS FIX: Blocca zoom e rimbalzi su mobile */
         body { 
             margin: 0; 
             overflow: hidden; 
             background-color: #000; 
             font-family: 'Press Start 2P', cursive; 
-            touch-action: none; /* FONDAMENTALE: Blocca lo scroll nativo del browser */
+            touch-action: none; /* Impedisce scroll nativo */
+            user-select: none;
+            -webkit-user-select: none;
         }
         
         .scanlines {
@@ -39,6 +41,7 @@
             background: transparent; border: 2px solid #44ff44; color: #44ff44;
             padding: 15px 30px; font-family: 'Press Start 2P'; font-size: 14px; cursor: pointer;
             text-transform: uppercase; box-shadow: 0 0 10px #44ff44;
+            pointer-events: auto; /* Assicura che sia cliccabile */
         }
         #start-btn:hover { background: #44ff44; color: #000; }
 
@@ -50,12 +53,15 @@
         /* MODALE */
         #product-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92); z-index: 100; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.92); z-index: 2000; /* Z-index altissimo per stare sopra a tutto */
+            align-items: center; justify-content: center;
+            touch-action: none;
         }
         .modal-content {
             background: #000; border: 2px solid #44ff44; box-shadow: 0 0 50px rgba(68, 255, 68, 0.4);
             padding: 30px; width: 85%; max-width: 750px; color: #44ff44; position: relative;
             display: flex; flex-direction: column; 
+            pointer-events: auto; /* Riabilita il click dentro la modale */
         }
         .modal-image-container { text-align: center; margin-bottom: 25px; border-bottom: 2px dashed #44ff44; padding-bottom: 25px; background: #051505;}
         .modal-image { width: 96px; height: 96px; image-rendering: pixelated; border: 2px solid #228822; }
@@ -63,35 +69,39 @@
         #m-title { font-size: 16px; color: #fff; text-shadow: 2px 2px 0 #005500; line-height: 1.5; }
         #m-year { font-size: 10px; background: #004400; padding: 6px 10px; color: #fff; }
         .modal-body { font-size: 11px; line-height: 1.8; color: #ccffcc; font-family: 'Press Start 2P'; text-align: justify; }
+        
         .close-btn {
             margin-top: 25px; width: 100%; padding: 15px; background: #003300; border: 1px solid #44ff44; 
             color: #44ff44; font-family: 'Press Start 2P'; cursor: pointer; text-transform: uppercase; font-size: 12px;
+            pointer-events: auto; /* CRUCIALE: Rende il bottone cliccabile */
+            z-index: 2001;
         }
         .close-btn:hover { background: #44ff44; color: #000; }
-        canvas { cursor: crosshair; }
+        
+        /* Canvas deve stare sotto */
+        canvas { display: block; z-index: 1; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
 </head>
 <body>
 
-    <div style="font-family: 'Press Start 2P'; opacity: 0; position: absolute;">.</div>
-
     <div id="boot-screen">
         <img src="twins.png" style="width: 280px; margin-bottom: 30px; image-rendering: pixelated;" alt="Twins">
         <div id="boot-log"></div>
         <button id="start-btn" onclick="startSystem()">[ ACCEDI ALL'ARCHIVIO ]</button>
     </div>
+    
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <div class="scanlines"></div>
-    <div id="header">MOVE / DRAG TO EXPLORE // CLICK TO SELECT</div>
+    <div id="header">MOVE TO EXPLORE // CLICK TO SELECT</div>
 
     <div id="product-modal">
         <div class="modal-content">
             <div class="modal-image-container"><img id="m-image" class="modal-image" src="" alt="Icon"></div>
             <div class="modal-header"><span id="m-title">TITLE</span><span id="m-year">2000</span></div>
             <div id="m-desc" class="modal-body">Description...</div>
-            <button class="close-btn" onclick="closeModal()">[ CHIUDI SCHEDA ]</button>
+            <button class="close-btn" onclick="closeModal(event)">[ CHIUDI SCHEDA ]</button>
         </div>
     </div>
 
@@ -143,17 +153,14 @@
             ],
             "VISION": [
                 { text: "< HOME", target: "HOME", x: 0, y: 40, z: 0, color: "#ff4444", scale: 1.5 },
-                
                 { text: "NEURAL UI", x: 0, y: 0, z: 0, color: "#ffffff", scale: 1.5, details: {
                     year:"R&D", image:assets.vr, tech:"BCI",
                     desc:"Interfacce Neurali (BCI).\n\nOltre il touch screen: la ricerca di Carraro Lab esplora il controllo diretto dei dispositivi tramite onde cerebrali, aprendo nuove frontiere per l'accessibilità e l'interazione uomo-macchina."} 
                 },
-                
                 { text: "AI ETHICS", x: -35, y: -15, z: 0, color: "#ffffff", scale: 1.5, details: {
                     year:"ETHICS", image:assets.logo, tech:"HUMANISM",
                     desc:"Umanesimo Digitale.\n\nL'impegno per un'Intelligenza Artificiale etica e sostenibile. Aderiamo ai principi del Manifesto di Vienna per garantire che la tecnologia rimanga al servizio dell'uomo e della cultura."} 
                 },
-                
                 { text: "SPATIAL WEB", x: 35, y: -15, z: 0, color: "#ffffff", scale: 1.5, details: {
                     year:"WEB3", image:assets.tab, tech:"XR",
                     desc:"Spatial Computing e Web 3.0.\n\nIl passaggio da internet bidimensionale a spazi digitali tridimensionali e persistenti. Creazione di metaversi interoperabili e standard aperti per il futuro della rete."} 
@@ -162,48 +169,22 @@
             "PRODOTTI": [] 
         };
 
-        // --- GENERATORE NUVOLA FIBONACCI ---
+        // --- GENERATORE PRODOTTI ---
         function generateProductSphere() {
             const items = [];
             items.push({ text: "< HOME", target: "HOME", x: 0, y: 35, z: -10, color: "#ff4444", scale: 1.8 });
-
             const heroes = [
-                {
-                    t:"OMNIA", y:"1996-2005", i:assets.cd, tech:"HERO",
-                    d:"OMNIA - ENCICLOPEDIA MULTIMEDIALE\n\nLa più grande enciclopedia digitale realizzata in Europa, edita da De Agostini. Un best-seller assoluto che ha segnato un'epoca. Vincitrice del 'Nastro d'Oro' e del 'Grand Prix Moebius' a Lugano."
-                },
-                {
-                    t:"ROMA 3D", y:"2011", i:assets.tab, tech:"HERO",
-                    d:"VIRTUAL HISTORY ROMA\n\nPresentata ufficialmente da Steve Jobs durante il Keynote Apple dell'iPad 2 (Marzo 2011) definendola 'Wonderful App'. Prima app al mondo a utilizzare il brevetto 'Bubble Viewer'."
-                },
-                {
-                    t:"EXPO 2015", y:"2015", i:assets.vr, tech:"HERO",
-                    d:"VIRTUAL EXPO MILANO\n\nLa piattaforma ufficiale di realtà virtuale di Expo 2015. Sviluppata in collaborazione con Dassault Systèmes. Primo utilizzo di massa dei visori Samsung Gear VR."
-                },
-                {
-                    t:"EDULAB", y:"2022", i:assets.vr, tech:"HERO",
-                    d:"XR EDULAB & CULTURA CAMPANIA\n\nEcosistema digitale per la Scuola 4.0. Vincitore del 'Premio Moebius 2022' come miglior Metaverso editoriale. Include laboratori di Time Travel e aule immersive."
-                },
-                {
-                    t:"iHERITAGE", y:"2021-23", i:assets.tab, tech:"HERO",
-                    d:"UNESCO iHERITAGE\n\nProgetto strategico ICT Mediterranean (ENI CBC MED). Valorizzazione dei siti UNESCO in Sicilia, Spagna, Egitto, Giordania e Libano tramite tecnologie AR/VR."
-                }
+                { t:"OMNIA", y:"1996-2005", i:assets.cd, tech:"HERO", d:"OMNIA - ENCICLOPEDIA MULTIMEDIALE\n\nLa più grande enciclopedia digitale realizzata in Europa, edita da De Agostini. Un best-seller assoluto." },
+                { t:"ROMA 3D", y:"2011", i:assets.tab, tech:"HERO", d:"VIRTUAL HISTORY ROMA\n\nPresentata ufficialmente da Steve Jobs durante il Keynote Apple dell'iPad 2 (Marzo 2011)." },
+                { t:"EXPO 2015", y:"2015", i:assets.vr, tech:"HERO", d:"VIRTUAL EXPO MILANO\n\nLa piattaforma ufficiale di realtà virtuale di Expo 2015." },
+                { t:"EDULAB", y:"2022", i:assets.vr, tech:"HERO", d:"XR EDULAB & CULTURA CAMPANIA\n\nEcosistema digitale per la Scuola 4.0. Vincitore del 'Premio Moebius 2022'." },
+                { t:"iHERITAGE", y:"2021-23", i:assets.tab, tech:"HERO", d:"UNESCO iHERITAGE\n\nProgetto strategico ICT Mediterranean (ENI CBC MED)." }
             ];
-            
             heroes.forEach((h, i) => {
                 const angle = (i / heroes.length) * Math.PI * 2;
-                const radius = 40; 
-                items.push({
-                    text: h.t, x: Math.cos(angle)*radius, y: 0, z: Math.sin(angle)*radius, 
-                    color: "#ffff00", scale: 1.6, 
-                    details: {year:h.y, desc:h.d, tech:"HERO", image:h.i}
-                });
+                items.push({ text: h.t, x: Math.cos(angle)*40, y: 0, z: Math.sin(angle)*40, color: "#ffff00", scale: 1.6, details: {year:h.y, desc:h.d, tech:"HERO", image:h.i} });
             });
-
-            const count = 45; 
-            const radius = 60; 
-            const goldenRatio = (1 + Math.sqrt(5)) / 2;
-
+            const count = 45; const radius = 60; const goldenRatio = (1 + Math.sqrt(5)) / 2;
             for(let i=0; i<count; i++) {
                 const label = archiveWords[i % archiveWords.length];
                 const theta = 2 * Math.PI * i / goldenRatio;
@@ -211,22 +192,20 @@
                 const x = Math.cos(theta) * Math.sin(phi) * radius;
                 const y = Math.sin(theta) * Math.sin(phi) * radius;
                 const z = Math.cos(phi) * radius;
-
-                items.push({
-                    text: label, x: x, y: y, z: z,
-                    color: "#00aa00", scale: 1.0, 
-                    details: {year:"ARCHIVE", desc:"Progetto storico dell'archivio Carraro Lab.", tech:"LEGACY", image:assets.file}
-                });
+                items.push({ text: label, x: x, y: y, z: z, color: "#00aa00", scale: 1.0, details: {year:"ARCHIVE", desc:"Progetto storico dell'archivio Carraro Lab.", tech:"LEGACY", image:assets.file} });
             }
             return items;
         }
         SCENES["PRODOTTI"] = generateProductSphere();
 
-
         // --- ENGINE 3D ---
         let scene, camera, renderer, contentGroup, interactables = [];
         let raycaster, mouse = {x:0, y:0};
         let targetRotationX = 0, targetRotationY = 0;
+        
+        // VARIABILI PER FIX CLICK vs DRAG
+        let dragStartX = 0, dragStartY = 0;
+        let isDragging = false;
 
         function init3D() {
             scene = new THREE.Scene(); 
@@ -235,8 +214,7 @@
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            // Abilita pixel ratio per schermi retina/mobile
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.body.appendChild(renderer.domElement);
 
             contentGroup = new THREE.Group();
@@ -252,10 +230,10 @@
 
             raycaster = new THREE.Raycaster();
             
-            // --- GESTIONE INPUT UNIFICATA (Pointer Events) ---
-            // Funziona sia con mouse che con dito
-            window.addEventListener('pointermove', onPointerMove);
-            window.addEventListener('click', onClick);
+            // --- EVENTI PUNTATORE UNIFICATI ---
+            document.addEventListener('pointerdown', onPointerDown);
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
             window.addEventListener('resize', onResize);
 
             loadScene("HOME");
@@ -267,7 +245,6 @@
             const fontSize = 32; 
             ctx.font = `${fontSize}px "Press Start 2P"`;
             const textWidth = ctx.measureText(data.text).width;
-            
             canvas.width = textWidth + 40; canvas.height = fontSize + 40;
             
             ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0,0,canvas.width, canvas.height);
@@ -283,7 +260,6 @@
             const tex = new THREE.CanvasTexture(canvas); tex.minFilter = THREE.LinearFilter;
             const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0 });
             const sprite = new THREE.Sprite(mat);
-            
             const scaleFactor = 0.03; 
             const finalScale = scaleFactor * (data.scale || 1);
             
@@ -315,20 +291,56 @@
             }, 500);
         }
 
-        // --- FUNZIONE UNIFICATA MOUSE/TOUCH ---
+        // --- LOGICA INPUT CORRETTA ---
+        
+        function onPointerDown(e) {
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            isDragging = false; // Reset drag status
+        }
+
         function onPointerMove(e) {
             if(isModalOpen) return;
-            
-            // Calcola coordinate normalizzate (-1 to +1)
+
+            // FIX NAVIGAZIONE: Calcolo coordinate (Invertiti i segni per naturalezza)
+            // Se trascini a sinistra (negativo), vogliamo ruotare verso destra (positivo o viceversa a seconda dell'asse)
             const mx = (e.clientX / window.innerWidth) * 2 - 1;
             const my = -(e.clientY / window.innerHeight) * 2 + 1;
             
+            // Aggiorna mouse per il raycasting (hover)
             mouse.x = mx; 
             mouse.y = my;
             
-            // Aggiorna rotazione target
-            targetRotationY = mx * 1.5; 
-            targetRotationX = -my * 1.0; 
+            // Calcolo rotazione (invertito rispetto a prima)
+            targetRotationY = -mx * 1.5; // Meno davanti a mx inverte l'asse orizzontale
+            targetRotationX = my * 1.0;  // my positivo per asse verticale
+            
+            // Controlla se è un vero trascinamento o un micro-movimento involontario
+            if (e.pointerType !== 'mouse' && e.isPrimary) {
+                 // Per touch, consideriamo drag solo se ci si muove un po'
+                 // Non serve logica complessa qui perché la rotazione avviene sempre, 
+                 // ma il CLICK avverrà solo se la distanza è piccola (vedi onPointerUp)
+            }
+        }
+
+        function onPointerUp(e) {
+            // Se la modale è aperta, non fare nulla (gestito dai bottoni HTML)
+            if(isModalOpen) return;
+
+            // Calcola quanto ci siamo mossi dal punto di inizio
+            const dist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
+
+            // FIX CLICK: Se ci siamo mossi meno di 10 pixel, è un CLICK. Altrimenti è un DRAG.
+            if (dist < 10) {
+                // Esegue il raycasting per cliccare l'oggetto
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(interactables);
+                if (intersects.length > 0) {
+                    const obj = intersects[0].object;
+                    if(obj.userData.target) loadScene(obj.userData.target);
+                    else if(obj.userData.details) openModal(obj.userData.text, obj.userData.details);
+                }
+            }
         }
 
         let hoveredObj = null;
@@ -339,21 +351,15 @@
             document.getElementById('m-year').innerText = d.year;
             document.getElementById('m-desc').innerText = d.desc;
             document.getElementById('m-image').src = d.image;
-            modal.style.display = 'flex'; isModalOpen = true;
+            modal.style.display = 'flex'; 
+            isModalOpen = true;
         }
-        window.closeModal = function() { modal.style.display = 'none'; isModalOpen = false; }
 
-        function onClick(e) {
-            if(isModalOpen) return;
-            // Raycasting deve usare le coordinate aggiornate dal pointer
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(interactables);
-            
-            if (intersects.length > 0) {
-                const obj = intersects[0].object;
-                if(obj.userData.target) loadScene(obj.userData.target);
-                else if(obj.userData.details) openModal(obj.userData.text, obj.userData.details);
-            }
+        // FIX TASTO CHIUDI: Usa window.closeModal e accetta l'evento per fermare la propagazione
+        window.closeModal = function(e) { 
+            if(e) e.stopPropagation(); // Evita che il click passi sotto
+            modal.style.display = 'none'; 
+            isModalOpen = false; 
         }
 
         function onResize(){
@@ -365,11 +371,8 @@
             "SYSTEM: CARRARO LAB ARCHIVE LOADING...", 
             "> PREMIO MOEBIUS LUGANO (CULTURA CAMPANIA)", 
             "> F@IMP 2.0 AWARD BUDAPEST", 
-            "> UNITY AWARD SAN FRANCISCO (BEST NON-GAME)", 
             "> BEST IPAD APP 2011 (APPLE REWIND)", 
-            "> PREMIO MOEBIUS INTERNATIONAL", 
             "> GRAND PRIX MOEBIUS (BIBLEWORLD)", 
-            "> NASTRO D'ORO MOEBIUS (OMNIA)", 
             "DATABASE LOADED."
         ];
 
@@ -400,6 +403,7 @@
                 contentGroup.rotation.y += (targetRotationY - contentGroup.rotation.y) * 0.05;
                 contentGroup.rotation.x += (targetRotationX - contentGroup.rotation.x) * 0.05;
 
+                // Gestione Hover (Solo visuale)
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(interactables);
 
