@@ -3,26 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Carraro OS - Archive Complete</title>
+    <title>Carraro OS - Mobile Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        /* CSS FIX: Blocca comportamenti nativi mobile */
         body { 
-            margin: 0; 
-            overflow: hidden; 
-            background-color: #000; 
+            margin: 0; overflow: hidden; background-color: #000; 
             font-family: 'Press Start 2P', cursive; 
-            touch-action: none; /* FONDAMENTALE */
-            -webkit-tap-highlight-color: transparent;
+            touch-action: none; -webkit-tap-highlight-color: transparent;
         }
-        
         .scanlines {
             position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
             background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.05));
             background-size: 100% 4px; pointer-events: none; z-index: 50;
         }
-
-        /* BOOT SCREEN */
         #boot-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000; z-index: 999;
@@ -34,32 +27,24 @@
         }
         .log-line { margin-bottom: 5px; opacity: 0; animation: fadeIn 0.1s forwards; }
         @keyframes fadeIn { to { opacity: 1; } }
-
         #start-btn {
             margin-top: 20px; display: none;
             background: transparent; border: 2px solid #44ff44; color: #44ff44;
             padding: 15px 30px; font-family: 'Press Start 2P'; font-size: 14px; cursor: pointer;
-            text-transform: uppercase; box-shadow: 0 0 10px #44ff44;
-            pointer-events: auto; z-index: 1000;
+            text-transform: uppercase; box-shadow: 0 0 10px #44ff44; pointer-events: auto; z-index: 1000;
         }
-        #start-btn:hover { background: #44ff44; color: #000; }
-
         #header {
             position: absolute; top: 20px; left: 20px; color: #44ff44; font-size: 10px; z-index: 10;
             pointer-events: none; text-shadow: 0 0 5px #44ff44; display: none;
         }
-
-        /* MODALE */
         #product-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92); z-index: 2000; 
-            align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.92); z-index: 2000; align-items: center; justify-content: center;
         }
         .modal-content {
             background: #000; border: 2px solid #44ff44; box-shadow: 0 0 50px rgba(68, 255, 68, 0.4);
             padding: 30px; width: 85%; max-width: 750px; color: #44ff44; position: relative;
-            display: flex; flex-direction: column; 
-            z-index: 2001; 
+            display: flex; flex-direction: column; z-index: 2001; 
         }
         .modal-image-container { text-align: center; margin-bottom: 25px; border-bottom: 2px dashed #44ff44; padding-bottom: 25px; background: #051505;}
         .modal-image { width: 96px; height: 96px; image-rendering: pixelated; border: 2px solid #228822; }
@@ -67,21 +52,14 @@
         #m-title { font-size: 16px; color: #fff; text-shadow: 2px 2px 0 #005500; line-height: 1.5; }
         #m-year { font-size: 10px; background: #004400; padding: 6px 10px; color: #fff; }
         .modal-body { font-size: 11px; line-height: 1.8; color: #ccffcc; font-family: 'Press Start 2P'; text-align: justify; }
-        
         .close-btn {
             margin-top: 25px; width: 100%; padding: 15px; background: #003300; border: 1px solid #44ff44; 
             color: #44ff44; font-family: 'Press Start 2P'; cursor: pointer; text-transform: uppercase; font-size: 12px;
         }
-        .close-btn:hover { background: #44ff44; color: #000; }
-        
         canvas { display: block; position: absolute; top:0; left:0; z-index: 1; }
-
-        /* TAG VERSIONE - DEBUG STYLE (ROSSO PER VISIBILITA') */
         #version-tag {
-            position: fixed; bottom: 10px; right: 10px; 
-            background-color: #aa0000; color: #ffffff; padding: 5px;
-            font-size: 12px; font-weight: bold; border: 1px solid #fff;
-            z-index: 10000; pointer-events: none;
+            position: fixed; bottom: 10px; right: 10px; background-color: #aa0000; color: #fff; padding: 5px;
+            font-size: 12px; font-weight: bold; border: 1px solid #fff; z-index: 10000; pointer-events: none;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -97,8 +75,7 @@
     
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <div class="scanlines"></div>
-    <div id="header">DESKTOP: MOUSE TO LOOK, CLICK TO SELECT <br> MOBILE: DRAG TO LOOK, TAP TO SELECT</div>
-    
+    <div id="header">DESKTOP: MOUSE TO LOOK <br> MOBILE: DRAG TO MOVE</div>
     <div id="version-tag">LOADING...</div>
 
     <div id="product-modal">
@@ -111,14 +88,11 @@
     </div>
 
     <script>
-        // --- AGGIORNAMENTO TIMESTAMP ---
         (function updateTimestamp() {
             const now = new Date();
-            const timeString = now.getHours().toString().padStart(2,'0') + ":" + 
-                               now.getMinutes().toString().padStart(2,'0') + ":" + 
-                               now.getSeconds().toString().padStart(2,'0');
+            const timeString = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0') + ":" + now.getSeconds().toString().padStart(2,'0');
             const tag = document.getElementById('version-tag');
-            if(tag) tag.innerText = "REV: " + timeString;
+            if(tag) tag.innerText = "LOGIC FIX: " + timeString;
         })();
 
         // --- ASSETS ---
@@ -133,11 +107,9 @@
             return c.toDataURL();
         }
         const assets = { cd: generateRetroImage('cd'), vr: generateRetroImage('vr'), tab: generateRetroImage('tablet'), logo: generateRetroImage('logo'), file: generateRetroImage('file') };
-
         const archiveWords = ["M9 Museum", "Brixia Time Machine", "Cenacolo Vinciano", "Tharros", "Bibleworld", "Museo Egizio", "Valle dei Templi", "Arena Verona", "Matera Sassi", "Teatro La Fenice", "Duomo Milano", "Parco Leonardo", "Immersive Academia", "Palazzo Reale", "Street View 2006", "Leonardo", "Dante", "Giotto", "Pompei", "Venezia", "Milano"];
 
         // --- SCENE CONFIG ---
-        // NOTE: SCALE AUMENTATE PER FACILITARE IL CLICK
         const SCENES = {
             "HOME": [
                 { text: "CHI SIAMO", target: "CHI_SIAMO", x: 0, y: 15, z: 0, color: "#44ff44", scale: 2.5 },
@@ -147,72 +119,43 @@
             ],
             "CHI_SIAMO": [
                 { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 2.0 },
-                { text: "GUALTIERO", x: -25, y: 0, z: 0, color: "#00ffff", scale: 2.0, details: {
-                    year:"FOUNDER", image:assets.logo, tech:"STRATEGY",
-                    desc:"Gualtiero Carraro.\n\nImprenditore digitale e pioniere della multimedialità in Europa. Ha guidato lo sviluppo di oltre 152 opere multimediali e ottenuto 11 premi internazionali, tra cui il prestigioso Premio Moebius."} 
-                },
-                { text: "ROBERTO", x: 25, y: 0, z: 0, color: "#00ffff", scale: 2.0, details: {
-                    year:"FOUNDER", image:assets.logo, tech:"DEV",
-                    desc:"Roberto Carraro.\n\nAutore multimediale e docente all'Accademia di Brera. Inventore di tecnologie brevettate come il 'Bubble Viewer' per la visualizzazione immersiva su tablet e smartphone."} 
-                }
+                { text: "GUALTIERO", x: -25, y: 0, z: 0, color: "#00ffff", scale: 2.0, details: {year:"FOUNDER", image:assets.logo, tech:"STRATEGY", desc:"Gualtiero Carraro."} },
+                { text: "ROBERTO", x: 25, y: 0, z: 0, color: "#00ffff", scale: 2.0, details: {year:"FOUNDER", image:assets.logo, tech:"DEV", desc:"Roberto Carraro."} }
             ],
             "COSA_FACCIAMO": [
                 { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 2.0 },
-                { text: "VR / AR", x: -25, y: 0, z: 0, color: "#ff00ff", scale: 2.0, details: {
-                    year:"XR", image:assets.vr, tech:"VR",
-                    desc:"Sviluppo di ambienti immersivi e musei virtuali. Dalle prime ricostruzioni della Roma Antica alle installazioni phygital per M9 e Palazzo Reale. Leader nella Realtà Virtuale e Aumentata."} 
-                },
-                { text: "AI GEN", x: 25, y: 0, z: 0, color: "#ff00ff", scale: 2.0, details: {
-                    year:"AI", image:assets.logo, tech:"GPT",
-                    desc:"Intelligenza Artificiale Generativa applicata alla cultura. Sviluppo di assistenti virtuali, generazione automatica di contenuti storici e piattaforme per la Scuola 4.0."} 
-                }
+                { text: "VR / AR", x: -25, y: 0, z: 0, color: "#ff00ff", scale: 2.0, details: {year:"XR", image:assets.vr, tech:"VR", desc:"Ambienti immersivi."} },
+                { text: "AI GEN", x: 25, y: 0, z: 0, color: "#ff00ff", scale: 2.0, details: {year:"AI", image:assets.logo, tech:"GPT", desc:"Intelligenza Artificiale."} }
             ],
             "VISION": [
                 { text: "< HOME", target: "HOME", x: 0, y: 40, z: 0, color: "#ff4444", scale: 2.0 },
-                { text: "NEURAL UI", x: 0, y: 0, z: 0, color: "#ffffff", scale: 2.0, details: {
-                    year:"R&D", image:assets.vr, tech:"BCI",
-                    desc:"Interfacce Neurali (BCI).\n\nOltre il touch screen: la ricerca di Carraro Lab esplora il controllo diretto dei dispositivi tramite onde cerebrali, aprendo nuove frontiere per l'accessibilità e l'interazione uomo-macchina."} 
-                },
-                { text: "AI ETHICS", x: -35, y: -15, z: 0, color: "#ffffff", scale: 2.0, details: {
-                    year:"ETHICS", image:assets.logo, tech:"HUMANISM",
-                    desc:"Umanesimo Digitale.\n\nL'impegno per un'Intelligenza Artificiale etica e sostenibile. Aderiamo ai principi del Manifesto di Vienna per garantire che la tecnologia rimanga al servizio dell'uomo e della cultura."} 
-                },
-                { text: "SPATIAL WEB", x: 35, y: -15, z: 0, color: "#ffffff", scale: 2.0, details: {
-                    year:"WEB3", image:assets.tab, tech:"XR",
-                    desc:"Spatial Computing e Web 3.0.\n\nIl passaggio da internet bidimensionale a spazi digitali tridimensionali e persistenti. Creazione di metaversi interoperabili e standard aperti per il futuro della rete."} 
-                }
+                { text: "NEURAL UI", x: 0, y: 0, z: 0, color: "#ffffff", scale: 2.0, details: {year:"R&D", image:assets.vr, tech:"BCI", desc:"Interfacce Neurali."} },
+                { text: "AI ETHICS", x: -35, y: -15, z: 0, color: "#ffffff", scale: 2.0, details: {year:"ETHICS", image:assets.logo, tech:"HUMANISM", desc:"Umanesimo Digitale."} },
+                { text: "SPATIAL WEB", x: 35, y: -15, z: 0, color: "#ffffff", scale: 2.0, details: {year:"WEB3", image:assets.tab, tech:"XR", desc:"Spatial Computing."} }
             ],
             "PRODOTTI": [] 
         };
 
-        // --- GENERATORE PRODOTTI ---
         function generateProductSphere() {
             const items = [];
-            // Scala aumentata a 2.3
-            items.push({ text: "< HOME", target: "HOME", x: 0, y: 30, z: -10, color: "#ff4444", scale: 2.3 });
-            
+            items.push({ text: "< HOME", target: "HOME", x: 0, y: 35, z: -10, color: "#ff4444", scale: 2.3 });
             const heroes = [
-                { t:"OMNIA", y:"1996-2005", i:assets.cd, tech:"HERO", d:"OMNIA - ENCICLOPEDIA MULTIMEDIALE\n\nLa più grande enciclopedia digitale realizzata in Europa, edita da De Agostini. Un best-seller assoluto." },
-                { t:"ROMA 3D", y:"2011", i:assets.tab, tech:"HERO", d:"VIRTUAL HISTORY ROMA\n\nPresentata ufficialmente da Steve Jobs durante il Keynote Apple dell'iPad 2 (Marzo 2011)." },
-                { t:"EXPO 2015", y:"2015", i:assets.vr, tech:"HERO", d:"VIRTUAL EXPO MILANO\n\nLa piattaforma ufficiale di realtà virtuale di Expo 2015." },
-                { t:"EDULAB", y:"2022", i:assets.vr, tech:"HERO", d:"XR EDULAB & CULTURA CAMPANIA\n\nEcosistema digitale per la Scuola 4.0. Vincitore del 'Premio Moebius 2022'." },
-                { t:"iHERITAGE", y:"2021-23", i:assets.tab, tech:"HERO", d:"UNESCO iHERITAGE\n\nProgetto strategico ICT Mediterranean (ENI CBC MED)." }
+                { t:"OMNIA", y:"1996-2005", i:assets.cd, tech:"HERO", d:"OMNIA - ENCICLOPEDIA MULTIMEDIALE" },
+                { t:"ROMA 3D", y:"2011", i:assets.tab, tech:"HERO", d:"VIRTUAL HISTORY ROMA" },
+                { t:"EXPO 2015", y:"2015", i:assets.vr, tech:"HERO", d:"VIRTUAL EXPO MILANO" },
+                { t:"EDULAB", y:"2022", i:assets.vr, tech:"HERO", d:"XR EDULAB" },
+                { t:"iHERITAGE", y:"2021-23", i:assets.tab, tech:"HERO", d:"UNESCO iHERITAGE" }
             ];
             heroes.forEach((h, i) => {
                 const angle = (i / heroes.length) * Math.PI * 2;
-                // Scala aumentata a 2.4 (MOLTO PIU GRANDI)
-                items.push({ text: h.t, x: Math.cos(angle)*40, y: 0, z: Math.sin(angle)*40, color: "#ffff00", scale: 2.4, details: {year:h.y, desc:h.d, tech:"HERO", image:h.i} });
+                items.push({ text: h.t, x: Math.cos(angle)*45, y: 0, z: Math.sin(angle)*45, color: "#ffff00", scale: 2.5, details: {year:h.y, desc:h.d, tech:"HERO", image:h.i} });
             });
-            const count = 45; const radius = 60; const goldenRatio = (1 + Math.sqrt(5)) / 2;
+            const count = 30; const radius = 60; const goldenRatio = (1 + Math.sqrt(5)) / 2;
             for(let i=0; i<count; i++) {
                 const label = archiveWords[i % archiveWords.length];
                 const theta = 2 * Math.PI * i / goldenRatio;
                 const phi = Math.acos(1 - 2 * (i + 0.5) / count);
-                const x = Math.cos(theta) * Math.sin(phi) * radius;
-                const y = Math.sin(theta) * Math.sin(phi) * radius;
-                const z = Math.cos(phi) * radius;
-                // Scala aumentata a 1.5 per le parole di sfondo
-                items.push({ text: label, x: x, y: y, z: z, color: "#00aa00", scale: 1.5, details: {year:"ARCHIVE", desc:"Progetto storico dell'archivio Carraro Lab.", tech:"LEGACY", image:assets.file} });
+                items.push({ text: label, x: Math.cos(theta)*Math.sin(phi)*radius, y: Math.sin(theta)*Math.sin(phi)*radius, z: Math.cos(phi)*radius, color: "#00aa00", scale: 1.5, details: {year:"ARCHIVE", desc:"Archivio.", tech:"LEGACY", image:assets.file} });
             }
             return items;
         }
@@ -220,15 +163,22 @@
 
         // --- ENGINE 3D ---
         let scene, camera, renderer, contentGroup, interactables = [];
-        let raycaster, mouse = {x:0, y:0};
-        let tapMouse = {x:0, y:0}; 
-        let targetRotationX = 0, targetRotationY = 0;
+        let raycaster, mouse = {x: -1000, y: -1000}; // Mouse fuori schermo di default
+        
+        // VARIABILI DI ROTAZIONE
+        let lon = 0, lat = 0; // Longitudine e Latitudine attuali
+        let phi = 0, theta = 0;
+        let targetLon = 0, targetLat = 0; // Dove vogliamo arrivare
+        
+        // VARIABILI DRAG MOBILE
+        let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
+        let onPointerDownLon = 0, onPointerDownLat = 0;
+        let isUserInteracting = false;
         
         function init3D() {
             scene = new THREE.Scene(); 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 1, 1000);
-            camera.position.z = 0.1; 
-
+            
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -236,38 +186,152 @@
 
             contentGroup = new THREE.Group();
             scene.add(contentGroup);
-
+            
+            // Stelle sfondo
             const starGeo = new THREE.BufferGeometry();
-            const starCount = 1000;
-            const starArr = new Float32Array(starCount*3);
-            for(let i=0; i<starCount*3; i++) starArr[i] = (Math.random()-0.5)*800;
+            const starArr = new Float32Array(3000);
+            for(let i=0; i<3000; i++) starArr[i] = (Math.random()-0.5)*800;
             starGeo.setAttribute('position', new THREE.BufferAttribute(starArr,3));
-            const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color:0x555555, size:0.5}));
-            scene.add(stars);
+            scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color:0x555555, size:0.5})));
 
             raycaster = new THREE.Raycaster();
             
-            // --- EVENTI ---
-            document.addEventListener('mousemove', onMouseMove);
+            // --- EVENTI DIVERSI PER MOBILE E DESKTOP ---
+            
+            // 1. MOBILE: Touch Events (Drag Logic)
             document.addEventListener('touchstart', onTouchStart, {passive: false});
             document.addEventListener('touchmove', onTouchMove, {passive: false});
-            document.addEventListener('touchend', onTouchEnd);
-            renderer.domElement.addEventListener('click', onCanvasClick);
+            document.addEventListener('touchend', onTouchEnd, {passive: false});
+
+            // 2. DESKTOP: Mouse Move (Hover Logic)
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mousedown', onMouseDown);
+            document.addEventListener('mouseup', onMouseUp);
+            
+            // 3. COMMON
             window.addEventListener('resize', onResize);
 
             loadScene("HOME");
             animate();
         }
 
+        // --- LOGICA MOBILE (DRAG RELATIVO) ---
+        function onTouchStart(e) {
+            if(isModalOpen) return;
+            if(e.touches.length === 1) {
+                // e.preventDefault(); // Rimosso per test
+                isUserInteracting = true;
+                
+                // Salviamo dove hai toccato
+                onPointerDownPointerX = e.touches[0].clientX;
+                onPointerDownPointerY = e.touches[0].clientY;
+
+                // Salviamo l'angolo attuale della camera
+                onPointerDownLon = targetLon;
+                onPointerDownLat = targetLat;
+            }
+        }
+
+        function onTouchMove(e) {
+            if(isModalOpen || !isUserInteracting) return;
+            e.preventDefault(); // Blocca lo scroll della pagina mentre trascini
+            
+            const touchX = e.touches[0].clientX;
+            const touchY = e.touches[0].clientY;
+            
+            // Calcola di quanto ti sei spostato
+            const deltaX = touchX - onPointerDownPointerX;
+            const deltaY = touchY - onPointerDownPointerY;
+
+            // DRAG SOGLIA: Se ti muovi pochissimo, non ruotare (per facilitare il tap)
+            if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) return;
+
+            // AGGIORNA ROTAZIONE (COMANDI INVERTITI)
+            // Più alto è il numero 0.3, più veloce gira.
+            // Il segno MENO inverte la direzione.
+            targetLon = onPointerDownLon - deltaX * 0.3; 
+            targetLat = onPointerDownLat + deltaY * 0.3; 
+        }
+
+        function onTouchEnd(e) {
+            isUserInteracting = false;
+            
+            // LOGICA CLICK MOBILE
+            // Se quando alzi il dito, ti sei mosso pochissimo rispetto all'inizio, è un CLICK
+            // Usiamo changedTouches per sapere dov'era l'ultimo dito
+            if(e.changedTouches.length > 0) {
+                const t = e.changedTouches[0];
+                const dist = Math.hypot(t.clientX - onPointerDownPointerX, t.clientY - onPointerDownPointerY);
+                
+                if(dist < 10) { // Se mosso meno di 10px -> CLICK
+                    // Normalizza coordinate per raycaster
+                    mouse.x = (t.clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(t.clientY / window.innerHeight) * 2 + 1;
+                    checkIntersection(true); // true = esegui click
+                }
+            }
+        }
+
+        // --- LOGICA DESKTOP (HOVER) ---
+        function onMouseMove(e) {
+            if(isModalOpen || isUserInteracting) return;
+            // Su desktop, la posizione del mouse decide dove guardare (vecchio stile)
+            const mx = (e.clientX / window.innerWidth) * 2 - 1;
+            const my = -(e.clientY / window.innerHeight) * 2 + 1;
+            
+            // Aggiorna mouse per raycaster
+            mouse.x = mx;
+            mouse.y = my;
+
+            // Aggiorna rotazione target basata sulla posizione assoluta
+            targetLon = mx * 60; // 60 gradi max
+            targetLat = -my * 30; // 30 gradi max
+        }
+        
+        function onMouseDown(e) { isUserInteracting = true; }
+        function onMouseUp(e) { 
+            isUserInteracting = false; 
+            if(e.button === 0) checkIntersection(true); // Click sinistro
+        }
+
+        // --- CORE 3D ---
+        function checkIntersection(isClick) {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactables);
+            
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                
+                // HOVER EFFECT (Solo desktop visuale, o pre-click)
+                if(!isClick) {
+                    if(obj !== hoveredObj) {
+                        if(hoveredObj) new TWEEN.Tween(hoveredObj.scale).to({x: hoveredObj.userData.baseScale.x, y: hoveredObj.userData.baseScale.y}, 200).start();
+                        hoveredObj = obj;
+                        new TWEEN.Tween(obj.scale).to({x: obj.userData.baseScale.x * 1.2, y: obj.userData.baseScale.y * 1.2}, 200).start();
+                    }
+                } 
+                // CLICK EFFECT
+                else {
+                    if(obj.userData.target) loadScene(obj.userData.target);
+                    else if(obj.userData.details) openModal(obj.userData.text, obj.userData.details);
+                }
+            } else {
+                if(hoveredObj && !isClick) {
+                     new TWEEN.Tween(hoveredObj.scale).to({x: hoveredObj.userData.baseScale.x, y: hoveredObj.userData.baseScale.y}, 200).start();
+                     hoveredObj = null;
+                }
+            }
+        }
+        let hoveredObj = null;
+
         function createLabel(data) {
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-            const fontSize = 32; 
-            ctx.font = `${fontSize}px "Press Start 2P"`;
+            ctx.font = '32px "Press Start 2P"';
             const textWidth = ctx.measureText(data.text).width;
-            canvas.width = textWidth + 40; canvas.height = fontSize + 40;
+            canvas.width = textWidth + 40; canvas.height = 72; 
             
             ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0,0,canvas.width, canvas.height);
-            ctx.font = `${fontSize}px "Press Start 2P"`; 
+            ctx.font = '32px "Press Start 2P"'; 
             ctx.fillStyle = data.color; ctx.textAlign = "center"; ctx.textBaseline = "middle";
             ctx.fillText(data.text, canvas.width/2, canvas.height/2);
 
@@ -276,193 +340,97 @@
                 ctx.strokeRect(4, 4, canvas.width-8, canvas.height-8);
             }
 
-            const tex = new THREE.CanvasTexture(canvas); tex.minFilter = THREE.LinearFilter;
+            const tex = new THREE.CanvasTexture(canvas); 
             const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0 });
             const sprite = new THREE.Sprite(mat);
-            const scaleFactor = 0.03; 
-            const finalScale = scaleFactor * (data.scale || 1);
             
-            sprite.scale.set(canvas.width*finalScale, canvas.height*finalScale, 1);
+            const scaleFactor = 0.03 * (data.scale || 1);
+            sprite.scale.set(canvas.width*scaleFactor, canvas.height*scaleFactor, 1);
+            
+            // POSIZIONE SFERICA
             sprite.position.set(data.x, data.y, data.z); 
-            if(data.z === 0) sprite.position.z = -60;
+            if(data.z === 0 && data.x === 0 && data.y !== 0) sprite.position.z = -50; // Fix per elementi centrali
 
-            sprite.userData = { 
-                target: data.target, details: data.details, text: data.text,
-                baseScale: sprite.scale.clone(),
-                origPos: sprite.position.clone()
-            };
+            sprite.userData = { target: data.target, details: data.details, text: data.text, baseScale: sprite.scale.clone() };
             return sprite;
         }
 
         function loadScene(name) {
+            // Reset rotazione quando cambi scena
+            // targetLon = 0; targetLat = 0; // Decommenta se vuoi resettare la vista ogni volta
+            
             [...contentGroup.children].forEach(c => {
-                new TWEEN.Tween(c.material).to({opacity:0}, 400).onComplete(()=>contentGroup.remove(c)).start();
-                new TWEEN.Tween(c.scale).to({x:0, y:0}, 400).start();
+                new TWEEN.Tween(c.material).to({opacity:0}, 300).onComplete(()=>contentGroup.remove(c)).start();
             });
             interactables = [];
             setTimeout(() => {
-                new TWEEN.Tween(contentGroup.rotation).to({x:0, y:0}, 1000).easing(TWEEN.Easing.Cubic.Out).start();
                 SCENES[name].forEach((item, i) => {
                     const s = createLabel(item);
                     contentGroup.add(s); interactables.push(s);
-                    new TWEEN.Tween(s.material).to({opacity:1}, 800).delay(i*20).start();
+                    new TWEEN.Tween(s.material).to({opacity:1}, 600).delay(i*50).start();
                 });
-            }, 500);
+            }, 350);
         }
 
-        // --- GESTIONE INPUT DESKTOP ---
-        function onMouseMove(e) {
-            if(isModalOpen) return;
-            const mx = (e.clientX / window.innerWidth) * 2 - 1;
-            const my = -(e.clientY / window.innerHeight) * 2 + 1;
-            mouse.x = mx; mouse.y = my;
-            tapMouse.x = mx; tapMouse.y = my; 
-            targetRotationY = mx * 3.2; 
-            targetRotationX = -my * 1.8; 
-        }
-
-        // --- GESTIONE INPUT MOBILE (MODIFICATA) ---
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let isDragging = false; 
-
-        function onTouchStart(e) {
-            if(e.touches.length > 0) {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-                isDragging = false; 
-                
-                tapMouse.x = (touchStartX / window.innerWidth) * 2 - 1;
-                tapMouse.y = -(touchStartY / window.innerHeight) * 2 + 1;
-            }
-        }
-
-        function onTouchMove(e) {
-            if(isModalOpen) return;
-            e.preventDefault(); 
-            
-            if(e.touches.length > 0) {
-                const t = e.touches[0];
-                const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
-                
-                // DEADZONE 20px
-                if(dist < 20) {
-                    return; 
-                }
-
-                isDragging = true; 
-
-                // FIX COMANDI INVERTITI
-                const mx = (t.clientX / window.innerWidth) * 2 - 1;
-                const my = -(t.clientY / window.innerHeight) * 2 + 1;
-                
-                mouse.x = mx; mouse.y = my;
-                
-                // VELOCITÀ RIDOTTA E DIREZIONE INVERTITA
-                // Prima era 3.5, ora 1.5. Il segno "-" inverte la direzione Y (Destra/Sinistra)
-                targetRotationY = -mx * 1.5; 
-                // Prima era -2.5, ora +1.0. Il segno "+" inverte la direzione X (Su/Giù)
-                targetRotationX = my * 1.0; 
-            }
-        }
-        
-        function onTouchEnd() {}
-
-        function onCanvasClick(e) {
-            if(isModalOpen || isDragging) return;
-
-            raycaster.setFromCamera(tapMouse, camera);
-            const intersects = raycaster.intersectObjects(interactables);
-            
-            if (intersects.length > 0) {
-                const obj = intersects[0].object;
-                if(obj.userData.target) loadScene(obj.userData.target);
-                else if(obj.userData.details) openModal(obj.userData.text, obj.userData.details);
-            }
-        }
-
-        let hoveredObj = null;
+        // --- UI & BOOT ---
         const modal = document.getElementById('product-modal'); let isModalOpen = false;
-
         function openModal(title, d) {
             document.getElementById('m-title').innerText = title;
             document.getElementById('m-year').innerText = d.year;
             document.getElementById('m-desc').innerText = d.desc;
             document.getElementById('m-image').src = d.image;
-            modal.style.display = 'flex'; 
-            isModalOpen = true;
+            modal.style.display = 'flex'; isModalOpen = true;
         }
-
-        window.closeModal = function() { 
-            modal.style.display = 'none'; 
-            isModalOpen = false; 
-            isDragging = false;
-        }
-
-        function onResize(){
-            camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        const bootLogs = [
-            "SYSTEM: CARRARO LAB ARCHIVE LOADING...", 
-            "> PREMIO MOEBIUS LUGANO (CULTURA CAMPANIA)", 
-            "> F@IMP 2.0 AWARD BUDAPEST", 
-            "> BEST IPAD APP 2011 (APPLE REWIND)", 
-            "> GRAND PRIX MOEBIUS (BIBLEWORLD)", 
-            "DATABASE LOADED."
-        ];
-
+        window.closeModal = function() { modal.style.display = 'none'; isModalOpen = false; }
+        
+        const bootLogs = ["SYSTEM LOADING...", "INITIALIZING...", "DONE."];
         window.onload = function() {
             document.fonts.ready.then(function () {
                 const container = document.getElementById('boot-log'); let i = 0;
                 function printLog() {
                     if(i < bootLogs.length) {
                         const div = document.createElement('div'); div.className = 'log-line'; div.innerText = bootLogs[i];
-                        container.appendChild(div); i++; setTimeout(printLog, 250);
+                        container.appendChild(div); i++; setTimeout(printLog, 200);
                     } else { document.getElementById('start-btn').style.display='inline-block'; }
                 }
                 setTimeout(printLog, 500);
             });
         }
-        
         function startSystem() {
             document.getElementById('boot-screen').style.display='none';
             document.getElementById('header').style.display='block';
             let audio = document.getElementById('bg-music'); audio.volume=0.4; audio.play().catch(e=>{});
             init3D();
         }
+        function onResize(){
+            camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
 
         function animate(time) {
             requestAnimationFrame(animate); TWEEN.update(time);
 
-            if(!isModalOpen && contentGroup) {
-                contentGroup.rotation.y += (targetRotationY - contentGroup.rotation.y) * 0.05;
-                contentGroup.rotation.x += (targetRotationX - contentGroup.rotation.x) * 0.05;
+            // CALCOLO ROTAZIONE CAMERA FLUIDA
+            // Interpolazione tra posizione attuale (lon/lat) e target (targetLon/targetLat)
+            lon += (targetLon - lon) * 0.1;
+            lat += (targetLat - lat) * 0.1;
+            
+            // Limita lat per non ribaltarsi
+            lat = Math.max(-85, Math.min(85, lat));
 
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(interactables);
+            // Conversione coordinate sferiche
+            phi = THREE.MathUtils.degToRad(90 - lat);
+            theta = THREE.MathUtils.degToRad(lon);
 
-                if (hoveredObj && (!intersects.length || intersects[0].object !== hoveredObj)) {
-                    new TWEEN.Tween(hoveredObj.scale).to({ x: hoveredObj.userData.baseScale.x, y: hoveredObj.userData.baseScale.y }, 200).start();
-                    let c = 0x44ff44;
-                    if(hoveredObj.userData.target === "HOME") c = 0xff4444;
-                    else if(hoveredObj.userData.details && hoveredObj.userData.details.tech === "HERO") c = 0xffff00;
-                    else if(hoveredObj.userData.details && hoveredObj.userData.details.tech === "LEGACY") c = 0x00aa00;
-                    hoveredObj.material.color.setHex(c);
-                    hoveredObj = null; document.body.style.cursor = 'default';
-                }
+            const cx = 500 * Math.sin(phi) * Math.cos(theta); // Target X
+            const cy = 500 * Math.cos(phi); // Target Y
+            const cz = 500 * Math.sin(phi) * Math.sin(theta); // Target Z
 
-                if (intersects.length > 0) {
-                    const obj = intersects[0].object;
-                    if (obj !== hoveredObj) {
-                        hoveredObj = obj;
-                        new TWEEN.Tween(obj.scale).to({ x: obj.userData.baseScale.x * 1.3, y: obj.userData.baseScale.y * 1.3 }, 200).start();
-                        obj.material.color.set(0xffffff);
-                        document.body.style.cursor = 'pointer';
-                    }
-                }
-            }
+            if(camera) camera.lookAt(cx, cy, cz);
+
+            // Raycasting solo visivo se non trascini
+            if(!isUserInteracting && !isModalOpen) checkIntersection(false);
+
             if(renderer && scene && camera) renderer.render(scene, camera);
         }
     </script>
