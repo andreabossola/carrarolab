@@ -111,7 +111,7 @@
     </div>
 
     <script>
-        // --- AGGIORNAMENTO IMMEDIATO TIMESTAMP ---
+        // --- AGGIORNAMENTO TIMESTAMP ---
         (function updateTimestamp() {
             const now = new Date();
             const timeString = now.getHours().toString().padStart(2,'0') + ":" + 
@@ -137,46 +137,47 @@
         const archiveWords = ["M9 Museum", "Brixia Time Machine", "Cenacolo Vinciano", "Tharros", "Bibleworld", "Museo Egizio", "Valle dei Templi", "Arena Verona", "Matera Sassi", "Teatro La Fenice", "Duomo Milano", "Parco Leonardo", "Immersive Academia", "Palazzo Reale", "Street View 2006", "Leonardo", "Dante", "Giotto", "Pompei", "Venezia", "Milano"];
 
         // --- SCENE CONFIG ---
+        // NOTE: SCALE AUMENTATE PER FACILITARE IL CLICK
         const SCENES = {
             "HOME": [
-                { text: "CHI SIAMO", target: "CHI_SIAMO", x: 0, y: 15, z: 0, color: "#44ff44", scale: 2.0 },
-                { text: "COSA FACCIAMO", target: "COSA_FACCIAMO", x: -40, y: 0, z: 0, color: "#44ff44", scale: 2.0 },
-                { text: "PRODOTTI", target: "PRODOTTI", x: 0, y: -15, z: 0, color: "#44ff44", scale: 2.0 },
-                { text: "VISION", target: "VISION", x: 40, y: 0, z: 0, color: "#44ff44", scale: 2.0 }
+                { text: "CHI SIAMO", target: "CHI_SIAMO", x: 0, y: 15, z: 0, color: "#44ff44", scale: 2.5 },
+                { text: "COSA FACCIAMO", target: "COSA_FACCIAMO", x: -40, y: 0, z: 0, color: "#44ff44", scale: 2.5 },
+                { text: "PRODOTTI", target: "PRODOTTI", x: 0, y: -15, z: 0, color: "#44ff44", scale: 2.5 },
+                { text: "VISION", target: "VISION", x: 40, y: 0, z: 0, color: "#44ff44", scale: 2.5 }
             ],
             "CHI_SIAMO": [
-                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 1.5 },
-                { text: "GUALTIERO", x: -25, y: 0, z: 0, color: "#00ffff", scale: 1.5, details: {
+                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 2.0 },
+                { text: "GUALTIERO", x: -25, y: 0, z: 0, color: "#00ffff", scale: 2.0, details: {
                     year:"FOUNDER", image:assets.logo, tech:"STRATEGY",
                     desc:"Gualtiero Carraro.\n\nImprenditore digitale e pioniere della multimedialità in Europa. Ha guidato lo sviluppo di oltre 152 opere multimediali e ottenuto 11 premi internazionali, tra cui il prestigioso Premio Moebius."} 
                 },
-                { text: "ROBERTO", x: 25, y: 0, z: 0, color: "#00ffff", scale: 1.5, details: {
+                { text: "ROBERTO", x: 25, y: 0, z: 0, color: "#00ffff", scale: 2.0, details: {
                     year:"FOUNDER", image:assets.logo, tech:"DEV",
                     desc:"Roberto Carraro.\n\nAutore multimediale e docente all'Accademia di Brera. Inventore di tecnologie brevettate come il 'Bubble Viewer' per la visualizzazione immersiva su tablet e smartphone."} 
                 }
             ],
             "COSA_FACCIAMO": [
-                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 1.5 },
-                { text: "VR / AR", x: -25, y: 0, z: 0, color: "#ff00ff", scale: 1.5, details: {
+                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 2.0 },
+                { text: "VR / AR", x: -25, y: 0, z: 0, color: "#ff00ff", scale: 2.0, details: {
                     year:"XR", image:assets.vr, tech:"VR",
                     desc:"Sviluppo di ambienti immersivi e musei virtuali. Dalle prime ricostruzioni della Roma Antica alle installazioni phygital per M9 e Palazzo Reale. Leader nella Realtà Virtuale e Aumentata."} 
                 },
-                { text: "AI GEN", x: 25, y: 0, z: 0, color: "#ff00ff", scale: 1.5, details: {
+                { text: "AI GEN", x: 25, y: 0, z: 0, color: "#ff00ff", scale: 2.0, details: {
                     year:"AI", image:assets.logo, tech:"GPT",
                     desc:"Intelligenza Artificiale Generativa applicata alla cultura. Sviluppo di assistenti virtuali, generazione automatica di contenuti storici e piattaforme per la Scuola 4.0."} 
                 }
             ],
             "VISION": [
-                { text: "< HOME", target: "HOME", x: 0, y: 40, z: 0, color: "#ff4444", scale: 1.5 },
-                { text: "NEURAL UI", x: 0, y: 0, z: 0, color: "#ffffff", scale: 1.5, details: {
+                { text: "< HOME", target: "HOME", x: 0, y: 40, z: 0, color: "#ff4444", scale: 2.0 },
+                { text: "NEURAL UI", x: 0, y: 0, z: 0, color: "#ffffff", scale: 2.0, details: {
                     year:"R&D", image:assets.vr, tech:"BCI",
                     desc:"Interfacce Neurali (BCI).\n\nOltre il touch screen: la ricerca di Carraro Lab esplora il controllo diretto dei dispositivi tramite onde cerebrali, aprendo nuove frontiere per l'accessibilità e l'interazione uomo-macchina."} 
                 },
-                { text: "AI ETHICS", x: -35, y: -15, z: 0, color: "#ffffff", scale: 1.5, details: {
+                { text: "AI ETHICS", x: -35, y: -15, z: 0, color: "#ffffff", scale: 2.0, details: {
                     year:"ETHICS", image:assets.logo, tech:"HUMANISM",
                     desc:"Umanesimo Digitale.\n\nL'impegno per un'Intelligenza Artificiale etica e sostenibile. Aderiamo ai principi del Manifesto di Vienna per garantire che la tecnologia rimanga al servizio dell'uomo e della cultura."} 
                 },
-                { text: "SPATIAL WEB", x: 35, y: -15, z: 0, color: "#ffffff", scale: 1.5, details: {
+                { text: "SPATIAL WEB", x: 35, y: -15, z: 0, color: "#ffffff", scale: 2.0, details: {
                     year:"WEB3", image:assets.tab, tech:"XR",
                     desc:"Spatial Computing e Web 3.0.\n\nIl passaggio da internet bidimensionale a spazi digitali tridimensionali e persistenti. Creazione di metaversi interoperabili e standard aperti per il futuro della rete."} 
                 }
@@ -187,7 +188,8 @@
         // --- GENERATORE PRODOTTI ---
         function generateProductSphere() {
             const items = [];
-            items.push({ text: "< HOME", target: "HOME", x: 0, y: 30, z: -10, color: "#ff4444", scale: 1.8 });
+            // Scala aumentata a 2.3
+            items.push({ text: "< HOME", target: "HOME", x: 0, y: 30, z: -10, color: "#ff4444", scale: 2.3 });
             
             const heroes = [
                 { t:"OMNIA", y:"1996-2005", i:assets.cd, tech:"HERO", d:"OMNIA - ENCICLOPEDIA MULTIMEDIALE\n\nLa più grande enciclopedia digitale realizzata in Europa, edita da De Agostini. Un best-seller assoluto." },
@@ -198,7 +200,8 @@
             ];
             heroes.forEach((h, i) => {
                 const angle = (i / heroes.length) * Math.PI * 2;
-                items.push({ text: h.t, x: Math.cos(angle)*40, y: 0, z: Math.sin(angle)*40, color: "#ffff00", scale: 1.6, details: {year:h.y, desc:h.d, tech:"HERO", image:h.i} });
+                // Scala aumentata a 2.4 (MOLTO PIU GRANDI)
+                items.push({ text: h.t, x: Math.cos(angle)*40, y: 0, z: Math.sin(angle)*40, color: "#ffff00", scale: 2.4, details: {year:h.y, desc:h.d, tech:"HERO", image:h.i} });
             });
             const count = 45; const radius = 60; const goldenRatio = (1 + Math.sqrt(5)) / 2;
             for(let i=0; i<count; i++) {
@@ -208,7 +211,8 @@
                 const x = Math.cos(theta) * Math.sin(phi) * radius;
                 const y = Math.sin(theta) * Math.sin(phi) * radius;
                 const z = Math.cos(phi) * radius;
-                items.push({ text: label, x: x, y: y, z: z, color: "#00aa00", scale: 1.0, details: {year:"ARCHIVE", desc:"Progetto storico dell'archivio Carraro Lab.", tech:"LEGACY", image:assets.file} });
+                // Scala aumentata a 1.5 per le parole di sfondo
+                items.push({ text: label, x: x, y: y, z: z, color: "#00aa00", scale: 1.5, details: {year:"ARCHIVE", desc:"Progetto storico dell'archivio Carraro Lab.", tech:"LEGACY", image:assets.file} });
             }
             return items;
         }
@@ -312,12 +316,12 @@
             const mx = (e.clientX / window.innerWidth) * 2 - 1;
             const my = -(e.clientY / window.innerHeight) * 2 + 1;
             mouse.x = mx; mouse.y = my;
-            tapMouse.x = mx; tapMouse.y = my; // Su desktop coincidono sempre
+            tapMouse.x = mx; tapMouse.y = my; 
             targetRotationY = mx * 3.2; 
             targetRotationX = -my * 1.8; 
         }
 
-        // --- GESTIONE INPUT MOBILE (DEADZONE) ---
+        // --- GESTIONE INPUT MOBILE (MODIFICATA) ---
         let touchStartX = 0;
         let touchStartY = 0;
         let isDragging = false; 
@@ -328,7 +332,6 @@
                 touchStartY = e.touches[0].clientY;
                 isDragging = false; 
                 
-                // SALVA COORDINATE TAP (ferme)
                 tapMouse.x = (touchStartX / window.innerWidth) * 2 - 1;
                 tapMouse.y = -(touchStartY / window.innerHeight) * 2 + 1;
             }
@@ -342,20 +345,24 @@
                 const t = e.touches[0];
                 const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
                 
-                // --- DEADZONE LOGIC (20px) ---
+                // DEADZONE 20px
                 if(dist < 20) {
-                    return; // NON muovere la scena se il dito trema
+                    return; 
                 }
 
-                // Se superi i 20px, ruota la scena
                 isDragging = true; 
 
+                // FIX COMANDI INVERTITI
                 const mx = (t.clientX / window.innerWidth) * 2 - 1;
                 const my = -(t.clientY / window.innerHeight) * 2 + 1;
                 
                 mouse.x = mx; mouse.y = my;
-                targetRotationY = mx * 3.5; 
-                targetRotationX = -my * 2.5; 
+                
+                // VELOCITÀ RIDOTTA E DIREZIONE INVERTITA
+                // Prima era 3.5, ora 1.5. Il segno "-" inverte la direzione Y (Destra/Sinistra)
+                targetRotationY = -mx * 1.5; 
+                // Prima era -2.5, ora +1.0. Il segno "+" inverte la direzione X (Su/Giù)
+                targetRotationX = my * 1.0; 
             }
         }
         
@@ -364,7 +371,6 @@
         function onCanvasClick(e) {
             if(isModalOpen || isDragging) return;
 
-            // USA tapMouse (dove hai toccato) non mouse (dove si è mossa la camera)
             raycaster.setFromCamera(tapMouse, camera);
             const intersects = raycaster.intersectObjects(interactables);
             
