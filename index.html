@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Carraro OS - Final Stable</title>
+    <title>Carraro OS - Stable Restore</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -81,7 +81,7 @@
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <div class="scanlines"></div>
     <div id="header">DESKTOP: CLICK TO SELECT <br> MOBILE: DRAG TO MOVE</div>
-    <div id="version-tag">FINAL STABLE</div>
+    <div id="version-tag">RESTORED STABLE</div>
 
     <div id="product-modal">
         <div class="modal-content">
@@ -97,7 +97,7 @@
             const now = new Date();
             const timeString = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0') + ":" + now.getSeconds().toString().padStart(2,'0');
             const tag = document.getElementById('version-tag');
-            if(tag) tag.innerText = "STABLE: " + timeString;
+            if(tag) tag.innerText = "RESTORED: " + timeString;
         })();
 
         // --- ASSETS ---
@@ -115,29 +115,29 @@
         const archiveWords = ["M9 Museum", "Brixia Time Machine", "Cenacolo Vinciano", "Tharros", "Bibleworld", "Museo Egizio", "Valle dei Templi", "Arena Verona", "Matera Sassi", "Teatro La Fenice", "Duomo Milano", "Parco Leonardo", "Immersive Academia", "Palazzo Reale", "Street View 2006", "Leonardo", "Dante", "Giotto", "Pompei", "Venezia", "Milano"];
 
         // --- SCENE CONFIG ---
-        // OFFSET RIDOTTI PER STARE TUTTO NELLO SCHERMO
+        // RIPRISTINATE COORDINATE STANDARD (Non schiacciate)
         const SCENES = {
             "HOME": [
                 { text: "CHI SIAMO", target: "CHI_SIAMO", x: 0, y: 15, z: 0, color: "#44ff44", scale: 2.5 }, 
-                { text: "COSA FACCIAMO", target: "COSA_FACCIAMO", x: -35, y: 0, z: 0, color: "#44ff44", scale: 2.5 },
+                { text: "COSA FACCIAMO", target: "COSA_FACCIAMO", x: -40, y: 0, z: 0, color: "#44ff44", scale: 2.5 },
                 { text: "PRODOTTI", target: "PRODOTTI", x: 0, y: -15, z: 0, color: "#44ff44", scale: 2.5 },
-                { text: "VISION", target: "VISION", x: 35, y: 0, z: 0, color: "#44ff44", scale: 2.5 }
+                { text: "VISION", target: "VISION", x: 40, y: 0, z: 0, color: "#44ff44", scale: 2.5 }
             ],
             "CHI_SIAMO": [
-                { text: "< HOME", target: "HOME", x: 0, y: 30, z: 0, color: "#ff4444", scale: 2.5 },
+                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 2.5 },
                 { text: "GUALTIERO", x: -25, y: 0, z: 0, color: "#00ffff", scale: 2.5, details: {year:"FOUNDER", image:assets.logo, tech:"STRATEGY", desc:"Gualtiero Carraro."} },
                 { text: "ROBERTO", x: 25, y: 0, z: 0, color: "#00ffff", scale: 2.5, details: {year:"FOUNDER", image:assets.logo, tech:"DEV", desc:"Roberto Carraro."} }
             ],
             "COSA_FACCIAMO": [
-                { text: "< HOME", target: "HOME", x: 0, y: 30, z: 0, color: "#ff4444", scale: 2.5 },
+                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 2.5 },
                 { text: "VR / AR", x: -25, y: 0, z: 0, color: "#ff00ff", scale: 2.5, details: {year:"XR", image:assets.vr, tech:"VR", desc:"Ambienti immersivi."} },
                 { text: "AI GEN", x: 25, y: 0, z: 0, color: "#ff00ff", scale: 2.5, details: {year:"AI", image:assets.logo, tech:"GPT", desc:"Intelligenza Artificiale."} }
             ],
             "VISION": [
-                { text: "< HOME", target: "HOME", x: 0, y: 35, z: 0, color: "#ff4444", scale: 2.5 },
-                { text: "NEURAL UI", x: 0, y: 5, z: 0, color: "#ffffff", scale: 2.5, details: {year:"R&D", image:assets.vr, tech:"BCI", desc:"Interfacce Neurali."} },
-                { text: "AI ETHICS", x: -30, y: -10, z: 0, color: "#ffffff", scale: 2.5, details: {year:"ETHICS", image:assets.logo, tech:"HUMANISM", desc:"Umanesimo Digitale."} },
-                { text: "SPATIAL WEB", x: 30, y: -10, z: 0, color: "#ffffff", scale: 2.5, details: {year:"WEB3", image:assets.tab, tech:"XR", desc:"Spatial Computing."} }
+                { text: "< HOME", target: "HOME", x: 0, y: 40, z: 0, color: "#ff4444", scale: 2.5 },
+                { text: "NEURAL UI", x: 0, y: 0, z: 0, color: "#ffffff", scale: 2.5, details: {year:"R&D", image:assets.vr, tech:"BCI", desc:"Interfacce Neurali."} },
+                { text: "AI ETHICS", x: -35, y: -15, z: 0, color: "#ffffff", scale: 2.5, details: {year:"ETHICS", image:assets.logo, tech:"HUMANISM", desc:"Umanesimo Digitale."} },
+                { text: "SPATIAL WEB", x: 35, y: -15, z: 0, color: "#ffffff", scale: 2.5, details: {year:"WEB3", image:assets.tab, tech:"XR", desc:"Spatial Computing."} }
             ],
             "PRODOTTI": [] 
         };
@@ -154,7 +154,7 @@
             ];
             heroes.forEach((h, i) => {
                 const angle = (i / heroes.length) * Math.PI * 2;
-                items.push({ text: h.t, x: Math.cos(angle)*50, y: 0, z: Math.sin(angle)*50, color: "#ffff00", scale: 3.0, details: {year:h.y, desc:h.d, tech:"HERO", image:h.i} });
+                items.push({ text: h.t, x: Math.cos(angle)*50, y: 0, z: Math.sin(angle)*50, color: "#ffff00", scale: 2.8, details: {year:h.y, desc:h.d, tech:"HERO", image:h.i} });
             });
             const count = 30; const radius = 70; 
             const goldenRatio = (1 + Math.sqrt(5)) / 2;
@@ -173,20 +173,16 @@
         let raycaster, mouse = {x: -1000, y: -1000}; 
         
         let targetRotationX = 0, targetRotationY = 0;
-        
         let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
         let onPointerDownLon = 0, onPointerDownLat = 0;
         let isUserInteracting = false;
         
-        // VARIABILI PER MOBILE DRAG
-        let lon = 0, lat = 0; 
-        
         function init3D() {
             scene = new THREE.Scene(); 
-            // CAMERA POSIZIONATA PER VEDERE TUTTO
+            // CORREZIONE FONDAMENTALE: CAMERA INDIETRO (Z=100)
             camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 1, 1000);
-            camera.position.z = 100; // Distanza ottimale
-            camera.lookAt(0,0,0); // FISSA AL CENTRO
+            camera.position.z = 100; 
+            camera.lookAt(0,0,0);
             
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -216,14 +212,15 @@
             animate();
         }
 
-        // --- LOGICA MOBILE (RUOTA IL GRUPPO) ---
+        // --- INPUT HANDLING RIPRISTINATO ---
+
         function onTouchStart(e) {
             if(isModalOpen) return;
             if(e.touches.length === 1) {
                 isUserInteracting = true;
                 onPointerDownPointerX = e.touches[0].clientX;
                 onPointerDownPointerY = e.touches[0].clientY;
-                onPointerDownLon = targetRotationY; // Usa rotazione gruppo
+                onPointerDownLon = targetRotationY; 
                 onPointerDownLat = targetRotationX;
             }
         }
@@ -239,7 +236,7 @@
 
             if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) return;
 
-            // Ruota il GRUPPO, non la camera
+            // Logica drag mobile
             targetRotationY = onPointerDownLon + deltaX * 0.005; 
             targetRotationX = onPointerDownLat + deltaY * 0.005; 
         }
@@ -257,7 +254,6 @@
             }
         }
 
-        // --- LOGICA DESKTOP (PARALLASSE LEGGERA) ---
         function onMouseMove(e) {
             if(isModalOpen || isUserInteracting) return;
             const mx = (e.clientX / window.innerWidth) * 2 - 1;
@@ -265,10 +261,10 @@
             mouse.x = mx;
             mouse.y = my;
             
-            // RUOTA IL GRUPPO DI POCHISSIMO PER EFFETTO 3D (Parallasse)
-            // Non sposta la camera, inclina solo gli oggetti
-            targetRotationY = mx * 0.2; // Max ~11 gradi
-            targetRotationX = -my * 0.1; // Max ~5 gradi
+            // LOGICA DESKTOP: SOLO PARALLASSE, NIENTE ROTAZIONE COMPLETA
+            // Questo fa sì che il mouse sia libero per cliccare
+            targetRotationY = mx * 0.2; 
+            targetRotationX = -my * 0.1; 
         }
         
         function onMouseDown(e) { isUserInteracting = true; }
@@ -279,8 +275,7 @@
 
         function checkIntersection(isClick) {
             raycaster.setFromCamera(mouse, camera);
-            // Raycast contro i figli del gruppo ruotato
-            const intersects = raycaster.intersectObjects(contentGroup.children);
+            const intersects = raycaster.intersectObjects(contentGroup.children); // Raycast sui figli ruotati
             
             if (intersects.length > 0) {
                 const obj = intersects[0].object;
@@ -336,7 +331,6 @@
         }
 
         function loadScene(name) {
-            // Reset rotazione graduale
             new TWEEN.Tween(contentGroup.rotation).to({x:0, y:0}, 1000).start();
             targetRotationX = 0; targetRotationY = 0;
 
@@ -347,7 +341,7 @@
             setTimeout(() => {
                 SCENES[name].forEach((item, i) => {
                     const s = createLabel(item);
-                    contentGroup.add(s); interactables.push(s); // Nota: aggiungo a contentGroup, non scene diretta
+                    contentGroup.add(s); interactables.push(s); 
                     new TWEEN.Tween(s.material).to({opacity:1}, 600).delay(i*50).start();
                 });
             }, 350);
@@ -397,9 +391,7 @@
         function animate(time) {
             requestAnimationFrame(animate); TWEEN.update(time);
 
-            // APPLICA ROTAZIONE AL GRUPPO (Non alla camera)
             if(contentGroup) {
-                // Lerp per fluidità
                 contentGroup.rotation.y += (targetRotationY - contentGroup.rotation.y) * 0.1;
                 contentGroup.rotation.x += (targetRotationX - contentGroup.rotation.x) * 0.1;
             }
